@@ -8,6 +8,26 @@
   var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ---------- persistent light/dark theme, toggled from the navbar smiley ---------- */
+  var themeToggle = $(".nav-logo");
+  if (themeToggle) {
+    function syncTheme(theme, persist) {
+      if (theme === "dark") document.documentElement.dataset.theme = "dark";
+      else delete document.documentElement.dataset.theme;
+      var dark = theme === "dark", label = dark ? "Switch to light mode" : "Switch to dark mode";
+      themeToggle.setAttribute("aria-label", label);
+      themeToggle.setAttribute("title", label);
+      themeToggle.setAttribute("aria-pressed", dark ? "true" : "false");
+      var themeColor = $("meta[name='theme-color']");
+      if (themeColor) themeColor.setAttribute("content", dark ? "#111113" : "#fafafa");
+      if (persist) try { localStorage.setItem("gargi-theme", dark ? "dark" : "light"); } catch (e) {}
+    }
+    syncTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false);
+    themeToggle.addEventListener("click", function () {
+      syncTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true);
+    });
+  }
+
   /* ---------- scroll progress bar, nav hide/show, card media drift ---------- */
   var bar = $(".progress"), nav = $("#nav"), lastY = window.scrollY || 0;
   var stack = $(".stack"), cards = $$(".card");
@@ -163,7 +183,11 @@
     function layout() {
       var n = cards.length, mid = (n - 1) / 2;
       var m = /matrix\(([-\d.]+)/.exec(getComputedStyle(deck).transform), sc = m ? parseFloat(m[1]) || 1 : 1;
-      var avail = Math.max(0, stage.clientWidth / sc - deck.offsetWidth - 150), step = n > 1 ? clamp(avail / (n - 1), 26, 104) : 0;
+      var maxSlot = Math.max(1, Math.ceil(n / 2));
+      var angle = 12 * Math.PI / 180;
+      var rotatedWidth = deck.offsetWidth * Math.cos(angle) + deck.offsetHeight * Math.sin(angle);
+      var avail = Math.max(0, stage.clientWidth / sc - rotatedWidth - 32);
+      var step = n > 1 ? clamp(avail / maxSlot, 0, 104) : 0;
       cards.forEach(function (c, i) {
         var slot = i === 0 ? 0 : Math.ceil(i / 2) * (i % 2 ? -1 : 1);
         c.style.zIndex = n - i;
