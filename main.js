@@ -81,7 +81,7 @@
       eyes.forEach(function (eye) {
         var r = eye.getBoundingClientRect(); if (r.bottom < -200 || r.top > window.innerHeight + 200) return;
         var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-        var dx = ptr.x - cx, dy = ptr.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(11, d / 14);
+        var dx = ptr.x - cx, dy = ptr.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(8, d / 14);
         eye.firstElementChild.style.transform = "translate(" + (dx / d) * m * 0.8 + "px," + (dy / d) * m + "px)";
       });
     };
@@ -128,6 +128,36 @@
     });
   });
 
+  /* ---------- drag the Work project rail with a mouse; touch uses native swipe ---------- */
+  (function dragWorkRail() {
+    var rail = $("#wgrid"); if (!rail) return;
+    var drag = null, suppressClick = false;
+    rail.addEventListener("pointerdown", function (e) {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      drag = { id: e.pointerId, x: e.clientX, left: rail.scrollLeft, moved: false };
+      rail.setPointerCapture(e.pointerId);
+    });
+    rail.addEventListener("pointermove", function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x;
+      if (Math.abs(dx) > 6) { drag.moved = true; rail.classList.add("dragging"); }
+      if (drag.moved) { rail.scrollLeft = drag.left - dx; e.preventDefault(); }
+    });
+    function finish(e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      suppressClick = drag.moved; drag = null; rail.classList.remove("dragging");
+      if (rail.hasPointerCapture(e.pointerId)) rail.releasePointerCapture(e.pointerId);
+      if (suppressClick) setTimeout(function () { suppressClick = false; }, 0);
+    }
+    rail.addEventListener("pointerup", finish);
+    rail.addEventListener("pointercancel", finish);
+    rail.addEventListener("click", function (e) {
+      if (!suppressClick) return;
+      e.preventDefault(); e.stopPropagation(); suppressClick = false;
+    }, true);
+    rail.addEventListener("dragstart", function (e) { e.preventDefault(); });
+  })();
+
   /* ---------- photo strip: hide the section until photos exist ---------- */
   var lens = $("#lens");
   if (lens) setTimeout(function () { if (!$(".lensfig", lens)) lens.style.display = "none"; }, 2500);
@@ -144,7 +174,7 @@
     var root = $("#kps"); if (!root) return;
     var stage = $(".kps-stage", root), deck = $(".kps-deck", root), box = $(".kps-lightbox", root);
     var cards = [], mode = "stack", busy = false, drag = null, moved = false, hint = $(".kps-hint", root);
-    var ROT = [-2.5, 2.2, -1.4, 3.5, -3];
+    var ROT = [12, 10, 6, 0, -5, -9, -12];
 
     function layout() {
       var n = cards.length, mid = (n - 1) / 2;
@@ -216,7 +246,10 @@
     }
 
     function init() {
-      cards = $$(".kps-card", deck); if (!cards.length) { root.style.display = "none"; return; }
+      cards = $$(".kps-card", deck);
+      cards.slice(7).forEach(function (c) { c.remove(); });
+      cards = cards.slice(0, 7);
+      if (!cards.length) { root.style.display = "none"; return; }
       deck.addEventListener("pointerdown", down); deck.addEventListener("pointermove", move);
       deck.addEventListener("pointerup", up); deck.addEventListener("pointercancel", cancel);
       deck.addEventListener("click", function (e) { var c = e.target.closest(".kps-card"); if (c && mode === "fan") open(c); });
@@ -234,13 +267,7 @@
       window.addEventListener("resize", layout);
       document.body.appendChild(box);                  /* lightbox lives on <body> so nothing can clip it */
       layout();
-      /* intro: the closed stack opens up into the fan once the page has loaded */
-      if (reduce) { setMode("fan"); return; }
-      setTimeout(function () {
-        cards.forEach(function (c, i) { c.style.setProperty("--td", (i * 55) + "ms"); });
-        setMode("fan");
-        setTimeout(function () { cards.forEach(function (c) { c.style.removeProperty("--td"); }); }, 1100);
-      }, 650);
+      /* Keep the seven photo cards stacked on the About hero. */
     }
     // wait until every image has loaded or failed (failed optional cards remove themselves), then start
     if (document.readyState === "complete") init(); else window.addEventListener("load", init);
