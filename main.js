@@ -1,5 +1,5 @@
 /* Portfolio behaviour (one file, every page):
-   scroll progress · nav hide/show · falling-tag physics · scroll-linked card media · footer eyes + name fit
+   scroll progress · nav hide/show · falling-tag physics · scroll-linked card media · footer cat + name fit
    reveal-on-scroll · copy email · work filters · lens strip · draggable playground */
 (function () {
   "use strict";
@@ -71,22 +71,6 @@
   /* ---------- hero: once the words have risen, stop clipping so italic overhangs ("feel") are never cut ---------- */
   var h1 = $(".hero h1");
   if (h1) setTimeout(function () { h1.classList.add("done"); }, reduce ? 0 : 2300);
-
-  /* ---------- footer eyes follow the cursor (one update per frame) ---------- */
-  var eyes = $$(".footer .eye");
-  if (eyes.length && window.matchMedia("(hover:hover)").matches) {
-    var ptr = null, eyeRaf = 0;
-    var moveEyes = function () {
-      eyeRaf = 0; if (!ptr) return;
-      eyes.forEach(function (eye) {
-        var r = eye.getBoundingClientRect(); if (r.bottom < -200 || r.top > window.innerHeight + 200) return;
-        var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-        var dx = ptr.x - cx, dy = ptr.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(6, d / 14);
-        eye.firstElementChild.style.transform = "translate(" + (dx / d) * m * 0.8 + "px," + (dy / d) * m * 0.5 + "px)";
-      });
-    };
-    window.addEventListener("pointermove", function (e) { ptr = { x: e.clientX, y: e.clientY }; if (!eyeRaf) eyeRaf = requestAnimationFrame(moveEyes); }, { passive: true });
-  }
 
   /* ---------- fit the giant footer name to the container ---------- */
   var big = $(".bigname");

@@ -517,14 +517,6 @@ body.pg{height:100vh;height:100svh}
 @media(max-width:900px){#wgrid>.wcard{flex-basis:68%}}
 @media(max-width:660px){#wgrid{width:calc(100% - 32px);margin:28px auto 0;gap:14px;padding:44px 2px 18px}#wgrid>.wcard{flex-basis:86%}#wgrid:before{top:5px;right:2px}}
 
-/* Footer cat eyes: almond eyeliner, warm irises, slit pupils and gentle blinks. */
-.footer .eyes{height:68px;align-items:center;gap:8px}
-.footer .eye{width:54px;height:38px;flex:none;overflow:hidden;background:#211a20;border:0;border-radius:0;clip-path:polygon(0 50%,16% 19%,44% 3%,56% 3%,84% 19%,100% 50%,84% 81%,56% 97%,44% 97%,16% 81%);animation:footer-eye-blink 6.5s ease-in-out infinite}
-.footer .eye:nth-child(2){animation-delay:-3.2s}
-.footer .eye:before{content:"";position:absolute;z-index:0;inset:3px;background:#fffdf1;clip-path:polygon(0 50%,16% 20%,45% 4%,55% 4%,84% 20%,100% 50%,84% 80%,55% 96%,45% 96%,16% 80%)}
-.footer .pupil{width:18px;height:24px;margin:-12px 0 0 -9px;border-radius:50%;background:radial-gradient(ellipse at 38% 35%,#fff1a8 0%,#e8c451 42%,#9a8f37 82%,#596844 100%);z-index:1;transition:transform .1s ease-out}
-.footer .pupil:before{content:"";position:absolute;left:50%;top:2px;bottom:2px;width:3px;transform:translateX(-50%);border-radius:50%;background:#17131a}
-.footer .pupil:after{content:"";position:absolute;top:5px;left:5px;width:4px;height:4px;border-radius:50%;background:#fff;opacity:.9}
-@keyframes footer-eye-blink{0%,92%,100%{transform:scaleY(1)}94%,96%{transform:scaleY(.12)}}
-@media(prefers-reduced-motion:reduce){.footer .eye{animation:none}}
+/* Animated footer mascot. */
+.footer-cat{display:block;width:112px;height:112px;object-fit:contain;filter:drop-shadow(0 7px 12px rgba(0,0,0,.14))}
 @media(max-width:660px){.hero h1{align-self:stretch;max-width:100%;padding-inline:12px;text-align:left}}
