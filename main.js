@@ -12,34 +12,44 @@
   var bar = $(".progress"), nav = $("#nav"), lastY = window.scrollY || 0;
   var stack = $(".stack"), cards = $$(".card");
   var ticking = false;
-  /* media strips drift on their own (ping-pong, eased), and scrolling nudges them further.
-     They never pause, hover included. Only cards on screen are animated. */
-  var onScreen = new Set(), SPEED = 38; /* px per second */
-  if ("IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { e.isIntersecting ? onScreen.add(e.target) : onScreen.delete(e.target); }); }, { rootMargin: "100px 0px" });
-    cards.forEach(function (c) { io.observe(c); });
-  } else { cards.forEach(function (c) { onScreen.add(c); }); }
-  var t0 = performance.now();
-  function drift(now) {
-    if (!cards.length) return;
-    var vh = window.innerHeight, sy = window.scrollY, t = ((now || performance.now()) - t0) / 1000;
-    cards.forEach(function (card, i) {
-      if (!onScreen.has(card)) return;
-      var strip = $(".strip", card), track = $(".track", card);
-      if (!strip || !track) return;
-      var overflow = Math.max(0, track.scrollWidth - strip.clientWidth);
-      if (!overflow) return;
-      var sticky = getComputedStyle(card).position === "sticky";
-      var h = card.offsetHeight;
-      var nat = sticky ? stack.offsetTop + i * h : card.offsetTop;
-      var p = clamp((sy - (nat - vh)) / (vh + h), 0, 1);
-      var phase = reduce ? p : (t * SPEED / overflow) / 2 + i * 0.37 + p * 0.5;   /* one back-and-forth = overflow*2 / SPEED seconds */
-      var tri = Math.abs(((phase % 1) + 1) % 1 * 2 - 1);                          /* 0..1..0 triangle */
-      var e = 0.5 - 0.5 * Math.cos(Math.PI * tri);                                /* ease the turn-arounds */
-      track.style.setProperty("--x", (-overflow * e).toFixed(1));
+  var lockScroll = function (on) { document.documentElement.style.overflow = on ? "hidden" : ""; };
+
+  /* Card media strips glide on their own (slow, eased ping-pong); scrolling nudges them a little further.
+     They never pause, hover included. Only on-screen cards are touched, and measurements are cached
+     so the per-frame work is just one style write per visible card. */
+  var SPEED = 24; /* px per second */
+  var live = [];
+  cards.forEach(function (card, i) {
+    var strip = $(".strip", card), track = $(".track", card);
+    if (strip && track) live.push({ card: card, strip: strip, track: track, i: i, on: false, overflow: 0, nat: 0, h: 0, sticky: false });
+  });
+  function measure() {
+    live.forEach(function (c) {
+      c.overflow = Math.max(0, c.track.scrollWidth - c.strip.clientWidth);
+      c.sticky = getComputedStyle(c.card).position === "sticky"; c.h = c.card.offsetHeight;
+      c.nat = c.sticky && stack ? stack.offsetTop + c.i * c.h : c.card.offsetTop;
     });
   }
-  if (!reduce) (function loop(now) { drift(now); requestAnimationFrame(loop); })();
+  if (live.length && "IntersectionObserver" in window) {
+    var cardIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { for (var k = 0; k < live.length; k++) if (live[k].card === e.target) live[k].on = e.isIntersecting; });
+    }, { rootMargin: "120px 0px" });
+    live.forEach(function (c) { cardIO.observe(c.card); });
+  } else live.forEach(function (c) { c.on = true; });
+  var t0 = performance.now(), lastMeasure = -9999;
+  function drift(now) {
+    now = now || performance.now();
+    if (now - lastMeasure > 900) { measure(); lastMeasure = now; }      /* cheap re-measure: images/fonts/resize all settle here */
+    var vh = window.innerHeight, sy = window.scrollY, t = (now - t0) / 1000;
+    for (var k = 0; k < live.length; k++) {
+      var c = live[k]; if (!c.on || !c.overflow) continue;
+      var p = clamp((sy - (c.nat - vh)) / (vh + c.h), 0, 1);
+      var phase = reduce ? p : (t * SPEED / c.overflow) / 2 + c.i * 0.37 + p * 0.35;   /* one back-and-forth = overflow*2 / SPEED seconds */
+      var tri = Math.abs(((phase % 1) + 1) % 1 * 2 - 1);                                /* 0..1..0 */
+      c.track.style.setProperty("--x", (-c.overflow * (0.5 - 0.5 * Math.cos(Math.PI * tri))).toFixed(1));
+    }
+  }
+  if (live.length && !reduce) (function loop(now) { if (!document.hidden) drift(now); requestAnimationFrame(loop); })();
   function onScroll() {
     var y = window.scrollY, max = document.documentElement.scrollHeight - window.innerHeight;
     if (bar) bar.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
@@ -49,25 +59,33 @@
       else if (lastY - y > 6) nav.classList.remove("hide");
     }
     lastY = y;
-    if (reduce) drift();
+    if (reduce && live.length) { measure(); drift(); }
     ticking = false;
   }
   if (!document.body.classList.contains("pg")) {
     window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", function () { lastMeasure = -9999; onScroll(); });
     onScroll();
   }
 
-  /* ---------- footer eyes follow the cursor ---------- */
-  var eyes = $$(".eye");
-  if (eyes.length) {
-    window.addEventListener("pointermove", function (e) {
+  /* ---------- hero: once the words have risen, stop clipping so italic overhangs ("feel") are never cut ---------- */
+  var h1 = $(".hero h1");
+  if (h1) setTimeout(function () { h1.classList.add("done"); }, reduce ? 0 : 2300);
+
+  /* ---------- footer eyes follow the cursor (one update per frame) ---------- */
+  var eyes = $$(".footer .eye");
+  if (eyes.length && window.matchMedia("(hover:hover)").matches) {
+    var ptr = null, eyeRaf = 0;
+    var moveEyes = function () {
+      eyeRaf = 0; if (!ptr) return;
       eyes.forEach(function (eye) {
-        var r = eye.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-        var dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(11, d / 14);
+        var r = eye.getBoundingClientRect(); if (r.bottom < -200 || r.top > window.innerHeight + 200) return;
+        var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        var dx = ptr.x - cx, dy = ptr.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(11, d / 14);
         eye.firstElementChild.style.transform = "translate(" + (dx / d) * m * 0.8 + "px," + (dy / d) * m + "px)";
       });
-    }, { passive: true });
+    };
+    window.addEventListener("pointermove", function (e) { ptr = { x: e.clientX, y: e.clientY }; if (!eyeRaf) eyeRaf = requestAnimationFrame(moveEyes); }, { passive: true });
   }
 
   /* ---------- fit the giant footer name to the container ---------- */
@@ -85,10 +103,10 @@
   /* ---------- reveal on scroll ---------- */
   var rv = $$("[data-reveal]");
   if ("IntersectionObserver" in window && rv.length) {
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    var revealIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); revealIO.unobserve(e.target); } });
     }, { threshold: 0.12 });
-    rv.forEach(function (el) { io.observe(el); });
+    rv.forEach(function (el) { revealIO.observe(el); });
   } else rv.forEach(function (el) { el.classList.add("in"); });
 
   /* ---------- copy email ---------- */
@@ -173,9 +191,9 @@
       $("figcaption b", box).textContent = c.getAttribute("data-title");
       $("figcaption span", box).textContent = c.getAttribute("data-place");
       $("figcaption em", box).textContent = c.getAttribute("data-year");
-      box.hidden = false; $(".kps-close", box).focus();
+      box.hidden = false; lockScroll(true); $(".kps-close", box).focus();
     }
-    function close() { box.hidden = true; }
+    function close() { box.hidden = true; lockScroll(false); }
 
     function down(e) {
       var c = e.target.closest(".kps-card"); if (!c || mode !== "stack" || busy || c !== cards[0]) return;
@@ -238,7 +256,7 @@
   (function tags() {
     var hero = $("#hero"), box = $("#tags");
     if (!hero || !box) return;
-    var els = $$(".tag", box);
+    var els = $$(".tag", box).filter(function (t) { return t.offsetWidth > 0; });   /* skip tags hidden on small screens */
     if (reduce || !window.Matter) { document.body.classList.add("no-physics"); return; }
     var M = Matter, Engine = M.Engine, Bodies = M.Bodies, Body = M.Body, Composite = M.Composite, Constraint = M.Constraint;
     var engine = Engine.create(); engine.gravity.y = 1.15;
@@ -296,13 +314,13 @@
 
     function start() {
       if (started) return; started = true;
-      measure(); buildWalls(); spawn(); render(); run();
+      measure(); buildWalls(); spawn(); render(); run(); hero.classList.add("pile");
     }
     // wait for fonts so tag sizes are correct, then start shortly after the heading begins to appear
-    var go = function () { setTimeout(start, 450); };
+    var go = function () { setTimeout(start, reduce ? 0 : 1100); };   /* let the headline finish rising first */
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(go); else go();
 
-    window.addEventListener("resize", function () { if (!started) return; measure(); buildWalls(); });
+    var rz = 0; window.addEventListener("resize", function () { if (!started || rz) return; rz = requestAnimationFrame(function () { rz = 0; measure(); buildWalls(); }); });
     document.addEventListener("visibilitychange", function () { document.hidden ? stop() : run(); });
     if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; visible ? run() : stop(); }).observe(hero);
 
@@ -329,16 +347,11 @@
      PLAYGROUND: drag the canvas; every card can be moved on its own.
      A click (without dragging) opens the card.
      ============================================================ */
-    var view = $(".pg-view");
+  var view = $(".pg-view");
   if (view) {
     var canvas = $(".pg-canvas", view), hint = $(".pg-hint");
     var x = 0, y = 0, vx = 0, vy = 0, dragging = false, lx = 0, ly = 0, raf = 0, W = 3200, H = 2200;
-    var hintText = $(".pg-hint-text", hint), mode = "pan", sticker = "✨", ink = $(".pg-ink", view), drawing = false, activeStroke = null;
     var gone = function () { if (hint) hint.classList.add("gone"); };
-    var instruction = function (message) {
-      if (hintText) hintText.textContent = message;
-      if (hint) hint.classList.remove("gone");
-    };
     var render = function () {
       x = clamp(x, -W / 2, W / 2); y = clamp(y, -H / 2, H / 2);
       canvas.style.transform = "translate3d(" + x + "px," + y + "px,0)";
@@ -349,94 +362,8 @@
       x += vx; y += vy; vx *= 0.93; vy *= 0.93; render();
       if (Math.abs(vx) + Math.abs(vy) > 0.2) raf = requestAnimationFrame(glide);
     };
-    var items = $$(".pg-item", view), original = items.map(function (it) {
-      return { left: it.style.left, top: it.style.top, rotation: it.style.getPropertyValue("--r") };
-    });
-    var remix = $(".pg-remix"), reset = $(".pg-reset"), hideButton = $(".pg-hide"), marksHidden = false;
-    if (remix) remix.addEventListener("click", function () {
-      var slots = [], columns = 4, rows = Math.ceil(items.length / columns);
-      for (var row = 0; row < rows; row++) for (var col = 0; col < columns; col++) {
-        slots.push({ x: (col - (columns - 1) / 2) * window.innerWidth * .22 + (Math.random() - .5) * 42,
-          y: (row - (rows - 1) / 2) * window.innerHeight * .26 + (Math.random() - .5) * 34 });
-      }
-      for (var i = slots.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1)), swap = slots[i]; slots[i] = slots[j]; slots[j] = swap;
-      }
-      items.forEach(function (it, i) {
-        it.style.left = slots[i].x + "px"; it.style.top = slots[i].y + "px";
-        it.style.setProperty("--r", (Math.random() * 10 - 5).toFixed(1) + "deg");
-      });
-      x = 0; y = 0; vx = vy = 0; cancelAnimationFrame(raf); render(); gone();
-    });
-    if (reset) reset.addEventListener("click", function () {
-      items.forEach(function (it, i) {
-        it.style.left = original[i].left; it.style.top = original[i].top;
-        it.style.setProperty("--r", original[i].rotation);
-      });
-      x = y = vx = vy = 0; cancelAnimationFrame(raf); render(); gone();
-    });
-    if (hideButton) hideButton.addEventListener("click", function () {
-      marksHidden = !marksHidden; canvas.classList.toggle("marks-hidden", marksHidden);
-      hideButton.setAttribute("aria-pressed", marksHidden ? "true" : "false");
-      hideButton.setAttribute("aria-label", marksHidden ? "Show stickers and doodles" : "Hide stickers and doodles");
-      hideButton.title = marksHidden ? "Show stickers and doodles" : "Hide stickers and doodles";
-    });
-    var stickerButtons = $$(".pg-sticker");
-    var doodleButton = $(".pg-doodle"), clearButton = $(".pg-clear");
-    var setMode = function (next) {
-      mode = next;
-      view.classList.toggle("doodle-mode", mode === "doodle");
-      view.classList.toggle("sticker-mode", mode === "sticker");
-      if (doodleButton) { doodleButton.classList.toggle("active", mode === "doodle"); doodleButton.setAttribute("aria-pressed", mode === "doodle" ? "true" : "false"); }
-      stickerButtons.forEach(function (button) {
-        var active = mode === "sticker" && button.getAttribute("data-emoji") === sticker;
-        button.classList.toggle("active", active); button.setAttribute("aria-pressed", active ? "true" : "false");
-      });
-      instruction(mode === "doodle" ? "Draw on the board · tap Draw to move" : mode === "sticker" ? "Tap the board to stamp · tap again to move" : "Drag, draw or stamp");
-    };
-    stickerButtons.forEach(function (button) {
-      button.setAttribute("aria-pressed", "false");
-      button.addEventListener("click", function () {
-        var emoji = button.getAttribute("data-emoji"), next = mode === "sticker" && sticker === emoji ? "pan" : "sticker";
-        sticker = emoji; setMode(next);
-      });
-    });
-    if (doodleButton) doodleButton.addEventListener("click", function () { setMode(mode === "doodle" ? "pan" : "doodle"); });
-    if (clearButton) clearButton.addEventListener("click", function () {
-      if (ink) ink.replaceChildren(); $$(".pg-stamp", canvas).forEach(function (stamp) { stamp.remove(); });
-      marksHidden = false; canvas.classList.remove("marks-hidden");
-      if (hideButton) { hideButton.setAttribute("aria-pressed", "false"); hideButton.setAttribute("aria-label", "Hide stickers and doodles"); hideButton.title = "Hide stickers and doodles"; }
-      gone();
-    });
-    var pointInCanvas = function (e) {
-      var r = view.getBoundingClientRect();
-      return { x: e.clientX - r.left - r.width / 2 - x, y: e.clientY - r.top - r.height / 2 - y };
-    };
-    var drawPoint = function (e, move) {
-      var r = view.getBoundingClientRect(), p = { x: e.clientX - r.left - x, y: e.clientY - r.top - y };
-      if (move) activeStroke.setAttribute("d", activeStroke.getAttribute("d") + " L" + p.x.toFixed(1) + " " + p.y.toFixed(1));
-      else {
-        var path = document.createElementNS("http://www.w3.org/2000/svg", "path"), colors = ["#ff6f91", "#168bff", "#f0a000", "#8b5cf6", "#20a47a"];
-        path.setAttribute("d", "M" + p.x.toFixed(1) + " " + p.y.toFixed(1));
-        path.setAttribute("stroke", colors[Math.floor(Math.random() * colors.length)]); path.setAttribute("stroke-width", "6");
-        ink.appendChild(path); activeStroke = path;
-      }
-    };
-    view.addEventListener("pointerdown", function (e) {
-      if (mode === "pan") return;
-      e.preventDefault(); e.stopImmediatePropagation(); view.setPointerCapture(e.pointerId); gone();
-      if (mode === "sticker") {
-        var p = pointInCanvas(e), stamp = document.createElement("span");
-        stamp.className = "pg-stamp"; stamp.setAttribute("aria-hidden", "true"); stamp.textContent = sticker;
-        stamp.style.left = p.x + "px"; stamp.style.top = p.y + "px"; stamp.style.zIndex = ++z;
-        stamp.style.setProperty("--sr", (Math.random() * 30 - 15).toFixed(1) + "deg"); canvas.appendChild(stamp);
-      } else { drawing = true; drawPoint(e, false); }
-    }, true);
-    view.addEventListener("pointermove", function (e) { if (drawing && activeStroke) drawPoint(e, true); }, true);
-    var finishDraw = function () { drawing = false; activeStroke = null; };
-    view.addEventListener("pointerup", finishDraw, true); view.addEventListener("pointercancel", finishDraw, true);
     var z = 10;
-    items.forEach(function (it) {
+    $$(".pg-item", view).forEach(function (it) {
       var on = false, moved = 0, sx = 0, sy = 0, ox = 0, oy = 0;
       it.addEventListener("pointerdown", function (e) {
         e.stopPropagation(); on = true; moved = 0; sx = e.clientX; sy = e.clientY;
@@ -455,6 +382,7 @@
       it.addEventListener("dragstart", function (e) { e.preventDefault(); });
     });
     view.addEventListener("pointerdown", function (e) {
+      if ((view.getAttribute("data-mode") || "move") !== "move") return;
       dragging = true; lx = e.clientX; ly = e.clientY; vx = vy = 0; cancelAnimationFrame(raf);
       view.classList.add("drag"); view.setPointerCapture(e.pointerId);
     });
@@ -472,5 +400,268 @@
     });
     window.addEventListener("resize", render);
     render();
+
+    /* ============================================================
+       PLAYGROUND TOYS: doodle pen (incl. rainbow), sticker stamps with
+       googly eyes, confetti, and emote rain you can throw around.
+       Doodles + stickers are remembered in this browser only.
+       ============================================================ */
+    (function toys() {
+      var tb = $(".pg-toy"); if (!tb) return;
+      var NS = "http://www.w3.org/2000/svg", INK = "#18181b";
+      var ink = $("#pgInk"), layer = $("#pgStickers"), fx = $("#pgFx"), grid = $("#pgGrid"), hintEl = $("#pgHint");
+      var rnd = function (a, b) { return a + Math.random() * (b - a); };
+      var pick = function (a) { return a[Math.floor(Math.random() * a.length)]; };
+      var S = 'stroke="#18181b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"';
+      var EMOTES = [
+        ["smiley", '<circle cx="32" cy="32" r="26" fill="#fdcf00" ' + S + '/><ellipse cx="23" cy="26" rx="3" ry="4.5" fill="#18181b"/><ellipse cx="41" cy="26" rx="3" ry="4.5" fill="#18181b"/><path d="M19 38c3 8 8 10 13 10s10-2 13-10" fill="none" ' + S + '/>'],
+        ["cool", '<circle cx="32" cy="32" r="26" fill="#fdcf00" ' + S + '/><path d="M12 24h40v6c0 5-4 8-9 8s-8-3-9-7h-4c-1 4-4 7-9 7s-9-3-9-8z" fill="#18181b"/><path d="M20 45c4 5 8 6 12 6s8-1 12-6" fill="none" ' + S + '/>'],
+        ["tongue", '<circle cx="32" cy="32" r="26" fill="#ffd0e0" ' + S + '/><path d="M18 22l9 4-9 4" fill="none" ' + S + '/><circle cx="43" cy="27" r="3.4" fill="#18181b"/><path d="M20 39c8 6 16 6 24 0" fill="none" ' + S + '/><path d="M28 43v6c0 4 8 4 8 0v-8" fill="#ff6b8b" ' + S + '/>'],
+        ["heart", '<path d="M32 55C9 39 5 26 11 18c6-8 17-6 21 3 4-9 15-11 21-3 6 8 2 21-21 37z" fill="#ff4d6d" ' + S + '/><path d="M18 22c2-3 6-3 8-1" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>'],
+        ["star", '<path d="M32 5l8 18 19 2-14 13 4 19-17-10-17 10 4-19L5 25l19-2z" fill="#ff894a" ' + S + '/>'],
+        ["flower", '<g ' + S + ' fill="#ffb3d1"><circle cx="32" cy="15" r="11"/><circle cx="48" cy="27" r="11"/><circle cx="42" cy="46" r="11"/><circle cx="22" cy="46" r="11"/><circle cx="16" cy="27" r="11"/></g><circle cx="32" cy="32" r="9" fill="#fdcf00" ' + S + '/>'],
+        ["sparkle", '<path d="M32 4C34 22 42 30 60 32 42 34 34 42 32 60 30 42 22 34 4 32 22 30 30 22 32 4z" fill="#b79cff" ' + S + '/>'],
+        ["eyes", '<g class="geye"><circle cx="19" cy="32" r="15" fill="#fff" ' + S + '/><circle class="pupil" cx="19" cy="32" r="6.5" fill="#18181b"/></g><g class="geye"><circle cx="45" cy="32" r="15" fill="#fff" ' + S + '/><circle class="pupil" cx="45" cy="32" r="6.5" fill="#18181b"/></g>'],
+        ["bolt", '<path d="M38 3L13 36h16l-4 25 26-35H35z" fill="#fdcf00" ' + S + '/>'],
+        ["cloud", '<path d="M18 48a12 12 0 0 1-1-24 15 15 0 0 1 29 3 10 10 0 0 1 0 21z" fill="#a3d9ff" ' + S + '/><circle cx="26" cy="36" r="2.3" fill="#18181b"/><circle cx="38" cy="36" r="2.3" fill="#18181b"/><path d="M28 42c3 3 5 3 8 0" fill="none" ' + S + '/>'],
+        ["sun", '<g stroke="#18181b" stroke-width="3" stroke-linecap="round"><path d="M32 4v8M32 52v8M4 32h8M52 32h8M12 12l6 6M46 46l6 6M52 12l-6 6M18 46l-6 6"/></g><circle cx="32" cy="32" r="13" fill="#fdcf00" ' + S + '/>'],
+        ["crown", '<path d="M8 48L5 20l15 13 12-19 12 19 15-13-3 28z" fill="#fdcf00" ' + S + '/><circle cx="32" cy="38" r="3.2" fill="#ff4d6d"/><circle cx="18" cy="40" r="2.4" fill="#5b6ee1"/><circle cx="46" cy="40" r="2.4" fill="#5adba5"/>'],
+        ["woah", '<path d="M8 12h48a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H30l-12 12v-12H8a4 4 0 0 1-4-4V16a4 4 0 0 1 4-4z" fill="#fff" ' + S + '/><text x="32" y="35" text-anchor="middle" font-family="Geist Mono,monospace" font-weight="700" font-size="17" fill="#18181b">woah!</text>'],
+        ["squiggle", '<path d="M5 34c5-18 11-18 14 0s9 18 14 0 9-18 14 0 6 10 12 4" fill="none" stroke="#5b6ee1" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>'],
+        ["spiral", '<path d="M32 32c0-4 6-4 6 0 0 8-12 8-12 0 0-12 18-12 18 0 0 16-24 16-24 0 0-20 30-20 30 0" fill="none" stroke="#ff6a13" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>'],
+        ["arrow", '<path d="M8 46C18 14 42 12 54 34" fill="none" ' + S + '/><path d="M44 33l11 2-3-11" fill="none" ' + S + '/>'],
+        ["scribble", '<path d="M5 42c10-12 14 6 24-4s16-12 30-2" fill="none" stroke="#fdcf00" stroke-width="7" stroke-linecap="round"/><path d="M8 52c14-4 30-4 48 0" fill="none" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>']
+      ];
+      var BY = {}; EMOTES.forEach(function (e) { BY[e[0]] = e[1]; });
+      var svgOf = function (k) { return '<svg viewBox="0 0 64 64" aria-hidden="true">' + (BY[k] || BY.smiley) + "</svg>"; };
+      var CONF = ["#fdcf00", "#ff6a13", "#ff4d6d", "#5b6ee1", "#22b07d", "#b79cff", "#a3d9ff"];
+
+      /* ---- state ---- */
+      var mode = "move", color = "#18181b", size = 8, stampKind = "smiley";
+      var hist = [], store = { ink: [], stk: [] }, KEY = "gg-playground-v1";
+      var vwc = function (e) { var r = view.getBoundingClientRect(); return [e.clientX - r.width / 2 - x, e.clientY - r.height / 2 - y]; };
+
+      /* ---- sticker tray ---- */
+      EMOTES.forEach(function (e) {
+        var b = document.createElement("button"); b.type = "button"; b.setAttribute("data-k", e[0]); b.setAttribute("aria-label", e[0]);
+        b.innerHTML = svgOf(e[0]); if (e[0] === stampKind) b.className = "on"; grid.appendChild(b);
+      });
+
+      /* ---- persistence (safe: only plain numbers/strings are ever read back) ---- */
+      function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (err) {} }
+      function load() {
+        var raw = null; try { raw = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (err) {}
+        if (!raw) return;
+        (raw.ink || []).slice(0, 200).forEach(function (s) { if (s && typeof s.c === "string" && Array.isArray(s.p) && s.p.length) buildStroke(s, true); });
+        (raw.stk || []).slice(0, 300).forEach(function (s) { if (s && BY[s.k] && isFinite(s.x) && isFinite(s.y)) addSticker(s.k, +s.x, +s.y, +s.r || 0, +s.s || 1, false, true); });
+      }
+
+      /* ---- pen ---- */
+      var pathD = function (p) {
+        if (p.length < 2) return "M" + p[0][0] + " " + p[0][1] + "l.1 0";
+        var d = "M" + p[0][0] + " " + p[0][1];
+        for (var i = 1; i < p.length - 1; i++) d += "Q" + p[i][0] + " " + p[i][1] + " " + (p[i][0] + p[i + 1][0]) / 2 + " " + (p[i][1] + p[i + 1][1]) / 2;
+        var l = p[p.length - 1]; return d + "L" + l[0] + " " + l[1];
+      };
+      var seg = function (g, a, b, w, hue) {
+        var el = document.createElementNS(NS, "path"); el.setAttribute("d", "M" + a[0] + " " + a[1] + "L" + b[0] + " " + b[1]);
+        el.setAttribute("stroke", "hsl(" + hue % 360 + ",92%,58%)"); el.setAttribute("stroke-width", w); g.appendChild(el);
+      };
+      function buildStroke(s, restore) {
+        var g = document.createElementNS(NS, "g"); g.setAttribute("class", "stroke"); g.setAttribute("fill", "none");
+        g.setAttribute("stroke-linecap", "round"); g.setAttribute("stroke-linejoin", "round");
+        var w = clamp(+s.w || 8, 2, 40), pts = s.p.map(function (q) { return [+q[0] || 0, +q[1] || 0]; });
+        if (s.c === "rainbow") {
+          if (pts.length < 2) seg(g, pts[0], [pts[0][0] + .1, pts[0][1]], w, 0);
+          for (var i = 1; i < pts.length; i++) seg(g, pts[i - 1], pts[i], w, i * 9);
+        } else {
+          var path = document.createElementNS(NS, "path"); path.setAttribute("d", pathD(pts));
+          path.setAttribute("stroke", /^#[0-9a-f]{6}$/i.test(s.c) ? s.c : INK); path.setAttribute("stroke-width", w); g.appendChild(path);
+        }
+        ink.appendChild(g); if (restore) { hist.push({ type: "ink", el: g, data: s }); store.ink.push(s); } return g;
+      }
+      var cur = null;
+      function penDown(e) {
+        var p = vwc(e); cur = { c: color, w: size, p: [p] };
+        var g = document.createElementNS(NS, "g"); g.setAttribute("fill", "none"); g.setAttribute("stroke-linecap", "round"); g.setAttribute("stroke-linejoin", "round");
+        cur.g = g;
+        if (color === "rainbow") seg(g, p, [p[0] + .1, p[1]], size, 0);
+        else { var path = document.createElementNS(NS, "path"); path.setAttribute("stroke", color); path.setAttribute("stroke-width", size); path.setAttribute("d", pathD([p])); g.appendChild(path); cur.path = path; }
+        ink.appendChild(g); view.setPointerCapture(e.pointerId); gone();
+      }
+      function penMove(e) {
+        if (!cur) return; var p = vwc(e), l = cur.p[cur.p.length - 1];
+        if (Math.hypot(p[0] - l[0], p[1] - l[1]) < 2.5) return;
+        cur.p.push(p);
+        if (cur.c === "rainbow") seg(cur.g, l, p, cur.w, (cur.p.length - 1) * 9); else cur.path.setAttribute("d", pathD(cur.p));
+      }
+      function penUp() {
+        if (!cur) return; var s = { c: cur.c, w: cur.w, p: cur.p.map(function (q) { return [Math.round(q[0]), Math.round(q[1])]; }) };
+        hist.push({ type: "ink", el: cur.g, data: s }); store.ink.push(s);
+        var n = 0, i = store.ink.length; while (i-- > 0) { n += store.ink[i].p.length; if (n > 9000) { store.ink.splice(0, i + 1); break; } }
+        cur = null; save();
+      }
+
+      /* ---- stickers + confetti ---- */
+      function burst(cx, cy, n) {
+        for (var i = 0; i < (n || 12); i++) (function () {
+          var p = document.createElement("i"), a = rnd(0, 6.283), d = rnd(36, 110), s = rnd(6, 12);
+          p.className = "pg-conf"; p.style.cssText = "left:" + cx + "px;top:" + cy + "px;width:" + s + "px;height:" + s + "px;background:" + pick(CONF) + ";border-radius:" + (Math.random() < .5 ? "50%" : "2px");
+          fx.appendChild(p);
+          var an = p.animate([{ transform: "translate(-50%,-50%) scale(1)", opacity: 1 }, { transform: "translate(calc(-50% + " + Math.cos(a) * d + "px),calc(-50% + " + (Math.sin(a) * d + 24) + "px)) rotate(" + rnd(-260, 260) + "deg) scale(.3)", opacity: 0 }], { duration: rnd(550, 950), easing: "cubic-bezier(.15,.75,.3,1)" });
+          an.onfinish = function () { p.remove(); };
+        })();
+      }
+      function addSticker(k, wx, wy, r, s, pop, restore) {
+        var el = document.createElement("div"); el.className = "pg-sticker" + (pop ? " pop" : ""); el.setAttribute("data-k", k);
+        el.style.left = wx + "px"; el.style.top = wy + "px"; el.style.setProperty("--r", r + "deg"); el.style.setProperty("--s", s);
+        el.innerHTML = svgOf(k); layer.appendChild(el);
+        var rec = { k: k, x: wx, y: wy, r: r, s: s }; store.stk.push(rec); hist.push({ type: "stk", el: el, rec: rec });
+        el._rec = rec; return el;
+      }
+      var lastStamp = null, stamping = false;
+      function stampAt(e) {
+        var p = vwc(e); addSticker(stampKind, Math.round(p[0]), Math.round(p[1]), Math.round(rnd(-16, 16)), +rnd(.85, 1.3).toFixed(2), true);
+        burst(e.clientX, e.clientY, 10); lastStamp = [e.clientX, e.clientY]; save();
+      }
+      function undo() {
+        var h = hist.pop(); if (!h) return;
+        if (h.type === "ink") { h.el.remove(); var i = store.ink.indexOf(h.data); if (i > -1) store.ink.splice(i, 1); }
+        else { h.el.remove(); var j = store.stk.indexOf(h.rec); if (j > -1) store.stk.splice(j, 1); }
+        save();
+      }
+      function clearAll() {
+        while (ink.firstChild) ink.removeChild(ink.firstChild); layer.innerHTML = ""; hist = []; store = { ink: [], stk: [] }; save(); stopRain();
+      }
+
+      /* ---- drag stickers in Move mode (tap = boing, double-tap = pop away) ---- */
+      layer.addEventListener("pointerdown", function (e) {
+        var el = e.target.closest(".pg-sticker"); if (!el || mode !== "move") return;
+        e.stopPropagation(); var rec = el._rec, sx = e.clientX, sy = e.clientY, ox = rec.x, oy = rec.y, moved = 0;
+        el.setPointerCapture(e.pointerId); el.classList.add("lift"); el.style.zIndex = ++z;
+        var mv = function (ev) { var dx = ev.clientX - sx, dy = ev.clientY - sy; moved = Math.max(moved, Math.hypot(dx, dy)); if (moved > 4) { rec.x = ox + dx; rec.y = oy + dy; el.style.left = rec.x + "px"; el.style.top = rec.y + "px"; } };
+        var upf = function (ev) {
+          el.removeEventListener("pointermove", mv); el.removeEventListener("pointerup", upf); el.removeEventListener("pointercancel", upf); el.classList.remove("lift");
+          if (moved <= 4) { el.classList.remove("boing"); void el.offsetWidth; el.classList.add("boing"); burst(ev.clientX, ev.clientY, 6); } else { rec.x = Math.round(rec.x); rec.y = Math.round(rec.y); save(); }
+        };
+        el.addEventListener("pointermove", mv); el.addEventListener("pointerup", upf); el.addEventListener("pointercancel", upf);
+      });
+      layer.addEventListener("dblclick", function (e) {
+        var el = e.target.closest(".pg-sticker"); if (!el) return;
+        var i = hist.findIndex(function (h) { return h.el === el; }); if (i > -1) { var h = hist.splice(i, 1)[0]; var j = store.stk.indexOf(h.rec); if (j > -1) store.stk.splice(j, 1); }
+        burst(e.clientX, e.clientY, 14); el.classList.add("out"); setTimeout(function () { el.remove(); }, 220); save();
+      });
+
+      /* googly eyes follow the pointer, wherever the eyes are (placed or raining) */
+      window.addEventListener("pointermove", function (e) {
+        var ps = document.querySelectorAll(".pupil"); if (!ps.length) return;
+        for (var i = 0; i < ps.length; i++) {
+          var p = ps[i], w = p.previousElementSibling, r = w.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+          var dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(7, d / 12);
+          p.style.transform = "translate(" + dx / d * m + "px," + dy / d * m + "px)";
+        }
+      }, { passive: true });
+
+      /* ---- view pointer routing by mode ---- */
+      view.addEventListener("pointerdown", function (e) {
+        if (mode !== "move") e.preventDefault();
+        if (mode === "pen") penDown(e);
+        else if (mode === "stamp") { stamping = true; view.setPointerCapture(e.pointerId); gone(); stampAt(e); }
+      });
+      view.addEventListener("pointermove", function (e) {
+        if (mode === "pen") penMove(e);
+        else if (mode === "stamp") {
+          ghost(e);
+          if (stamping && lastStamp && Math.hypot(e.clientX - lastStamp[0], e.clientY - lastStamp[1]) > 78) stampAt(e);
+        }
+      });
+      var endTool = function () { if (mode === "pen") penUp(); stamping = false; };
+      view.addEventListener("pointerup", endTool); view.addEventListener("pointercancel", endTool);
+      view.addEventListener("pointerleave", function () { if (gh) gh.style.opacity = 0; });
+
+      /* a little preview of the chosen sticker follows the mouse in stamp mode */
+      var gh = document.createElement("div"); gh.className = "pg-ghost"; fx.appendChild(gh);
+      function ghost(e) { if (e.pointerType === "touch") return; gh.style.opacity = .55; gh.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px) translate(-50%,-50%)"; }
+      function paintGhost() { gh.innerHTML = svgOf(stampKind); }
+
+      /* ---- emote rain (physics) ---- */
+      var rain = null;
+      function stopRain() {
+        if (!rain) return; cancelAnimationFrame(rain.raf); clearTimeout(rain.t1); clearTimeout(rain.t2); rain.timers.forEach(clearTimeout);
+        rain.items.forEach(function (it) { it.el.remove(); }); rain = null; setBtn("rain", false);
+      }
+      function startRain() {
+        if (!window.Matter) return; stopRain();
+        var M = Matter, Engine = M.Engine, Bodies = M.Bodies, Body = M.Body, Composite = M.Composite, Constraint = M.Constraint;
+        var eng = Engine.create(); eng.gravity.y = 1.05;
+        var w = window.innerWidth, h = window.innerHeight, floor = h - 92, small = w < 700, t = 400;
+        Composite.add(eng.world, [Bodies.rectangle(w / 2, floor + t / 2, w * 3, t, { isStatic: true, friction: .5 }), Bodies.rectangle(-t / 2, h / 2, t, h * 4, { isStatic: true }), Bodies.rectangle(w + t / 2, h / 2, t, h * 4, { isStatic: true })]);
+        rain = { eng: eng, items: [], timers: [], raf: 0, last: 0, acc: 0 };
+        var N = small ? 26 : 44;
+        for (var i = 0; i < N; i++) rain.timers.push(setTimeout(function () {
+          if (!rain) return;
+          var k = pick(EMOTES.slice(0, 13))[0], sz = rnd(small ? 46 : 54, small ? 66 : 84), el = document.createElement("div");
+          el.className = "pg-rain"; el.style.width = el.style.height = sz + "px"; el.innerHTML = svgOf(k); fx.appendChild(el);
+          var b = Bodies.circle(rnd(sz, w - sz), -sz, sz * .46, { restitution: .55, friction: .25, frictionAir: .004, density: .002, angle: rnd(-1, 1) });
+          Body.setAngularVelocity(b, rnd(-.1, .1)); Composite.add(eng.world, b);
+          var it = { el: el, b: b, sz: sz }; rain.items.push(it);
+          var cons = null;
+          el.addEventListener("pointerdown", function (e) {
+            e.preventDefault(); el.setPointerCapture(e.pointerId); el.classList.add("lift");
+            cons = Constraint.create({ pointA: { x: e.clientX, y: e.clientY }, bodyB: b, pointB: { x: e.clientX - b.position.x, y: e.clientY - b.position.y }, stiffness: .14, damping: .12, length: 0 });
+            Composite.add(eng.world, cons);
+          });
+          el.addEventListener("pointermove", function (e) { if (cons) { cons.pointA.x = e.clientX; cons.pointA.y = e.clientY; } });
+          var rel = function () { if (cons) { Composite.remove(eng.world, cons); cons = null; } el.classList.remove("lift"); };
+          el.addEventListener("pointerup", rel); el.addEventListener("pointercancel", rel);
+        }, i * 110));
+        var step = function (tm) {
+          if (!rain) return; rain.raf = requestAnimationFrame(step);
+          var dt = Math.min(48, tm - (rain.last || tm)); rain.last = tm; rain.acc += dt; var n = 0;
+          while (rain.acc >= 1000 / 60 && n < 3) { Engine.update(eng, 1000 / 60); rain.acc -= 1000 / 60; n++; }
+          rain.items.forEach(function (it) { it.el.style.transform = "translate3d(" + (it.b.position.x - it.sz / 2).toFixed(1) + "px," + (it.b.position.y - it.sz / 2).toFixed(1) + "px,0) rotate(" + it.b.angle.toFixed(3) + "rad)"; });
+        };
+        rain.raf = requestAnimationFrame(step); setBtn("rain", true);
+        rain.t1 = setTimeout(function () { if (rain) rain.items.forEach(function (it) { it.el.classList.add("fade"); }); }, 24000);
+        rain.t2 = setTimeout(stopRain, 25000);
+      }
+
+      /* ---- toolbar ---- */
+      var pops = { pen: $("#popPen"), stamp: $("#popStk") };
+      function setBtn(name, on) { var b = $('[data-act="' + name + '"],[data-tool="' + name + '"]', tb); if (b) b.setAttribute("aria-pressed", on ? "true" : "false"); }
+      function openPop(name) { Object.keys(pops).forEach(function (k) { pops[k].classList.toggle("on", k === name); }); }
+      function setMode(m) {
+        mode = m; view.setAttribute("data-mode", m);
+        ["move", "pen", "stamp"].forEach(function (k) { setBtn(k, k === m); });
+        if (m !== "stamp") gh.style.opacity = 0; if (m === "stamp") paintGhost();
+        if (hintEl) $("span", hintEl).textContent = m === "pen" ? "Draw anywhere, even over the cards" : m === "stamp" ? "Tap to stamp, drag to scatter a trail" : "Drag to move around. Try the pen, stickers and rain below";
+      }
+      tb.addEventListener("click", function (e) {
+        var b = e.target.closest("button"); if (!b) return;
+        if (b.hasAttribute("data-tool")) {
+          var t = b.getAttribute("data-tool");
+          if (t === "move") { setMode("move"); openPop(null); }
+          else if (mode === t) openPop(pops[t].classList.contains("on") ? null : t);
+          else { setMode(t); openPop(t); }
+        } else if (b.hasAttribute("data-act")) {
+          var a = b.getAttribute("data-act");
+          if (a === "undo") undo(); else if (a === "clear") { if (!hist.length && !rain || window.confirm("Clear all doodles and stickers?")) clearAll(); }
+          else if (a === "rain") { if (rain) stopRain(); else { openPop(null); startRain(); } }
+        } else if (b.hasAttribute("data-c")) {
+          color = b.getAttribute("data-c"); $$(".sw", tb).forEach(function (s) { s.classList.toggle("on", s === b); });
+        } else if (b.hasAttribute("data-w")) {
+          size = +b.getAttribute("data-w"); $$("[data-w]", tb).forEach(function (s) { s.classList.toggle("on", s === b); });
+        } else if (b.hasAttribute("data-k")) {
+          stampKind = b.getAttribute("data-k"); $$("#pgGrid button").forEach(function (s) { s.classList.toggle("on", s === b); }); paintGhost(); openPop(null);
+        }
+      });
+      document.addEventListener("pointerdown", function (e) { if (!tb.contains(e.target)) openPop(null); });
+      window.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { setMode("move"); openPop(null); stopRain(); }
+        else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
+      });
+      setMode("move"); load();
+    })();
+
   }
 })();
