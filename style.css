@@ -527,3 +527,4 @@ body.pg{height:100vh;height:100svh}
 .footer .pupil:after{content:"";position:absolute;top:5px;left:5px;width:4px;height:4px;border-radius:50%;background:#fff;opacity:.9}
 @keyframes footer-eye-blink{0%,92%,100%{transform:scaleY(1)}94%,96%{transform:scaleY(.12)}}
 @media(prefers-reduced-motion:reduce){.footer .eye{animation:none}}
+@media(max-width:660px){.hero h1{align-self:stretch;max-width:100%;padding-inline:12px;text-align:left}}
