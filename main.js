@@ -1,5 +1,5 @@
 /* Portfolio behaviour (one file, every page):
-   scroll progress · nav hide/show · falling-tag physics · scroll-linked card media · footer cat + name fit
+   scroll progress · nav hide/show · falling-tag physics · scroll-linked card media · footer eyes + name fit
    reveal-on-scroll · copy email · work filters · lens strip · draggable playground */
 (function () {
   "use strict";
@@ -8,35 +8,201 @@
   var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ---------- full-site interactive dot field ---------- */
+  (function interactiveDots() {
+    var canvas = document.createElement("canvas"), ctx = canvas.getContext && canvas.getContext("2d");
+    if (!ctx) return;
+    canvas.id = "interactive-dots"; canvas.setAttribute("aria-hidden", "true");
+    document.body.insertBefore(canvas, document.body.firstChild);
+    var w = 0, h = 0, dpr = 1, px = -1000, py = -1000, raf = 0;
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2); w = window.innerWidth; h = window.innerHeight;
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+      canvas.style.width = w + "px"; canvas.style.height = h + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); draw();
+    }
+    function draw() {
+      if (!w || !h) return;
+      ctx.clearRect(0, 0, w, h);
+      var dark = document.documentElement.dataset.theme === "dark", step = 25, radius = 148;
+      for (var y = 12; y < h + step; y += step) for (var x = 12; x < w + step; x += step) {
+        var dist = Math.hypot(x - px, y - py), near = Math.max(0, 1 - dist / radius);
+        var size = .7 + near * 1.65, alpha = (dark ? .10 : .075) + near * .3;
+        ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fillStyle = dark ? "rgba(244,244,245," + alpha + ")" : "rgba(24,24,27," + alpha + ")";
+        ctx.fill();
+      }
+      raf = 0;
+    }
+    function schedule() { if (!raf) raf = requestAnimationFrame(draw); }
+    window.addEventListener("pointermove", function (e) { if (e.pointerType === "touch") return; px = e.clientX; py = e.clientY; schedule(); }, { passive: true });
+    window.addEventListener("pointerdown", function (e) { if (e.pointerType !== "touch") return; px = e.clientX; py = e.clientY; schedule(); window.setTimeout(function () { px = py = -1000; schedule(); }, 900); }, { passive: true });
+    window.addEventListener("pointerout", function (e) { if (!e.relatedTarget) { px = py = -1000; schedule(); } });
+    window.addEventListener("resize", resize);
+    window.addEventListener("gargi-themechange", schedule);
+    resize();
+  })();
+
+  /* ---------- smooth direction-aware arrow cursor (fine pointers only) ---------- */
+  (function smoothArrowCursor() {
+    if (!window.matchMedia || !matchMedia("(hover:hover) and (pointer:fine)").matches) return;
+    var cursor = document.createElement("div");
+    cursor.id = "smooth-arrow-cursor"; cursor.setAttribute("aria-hidden", "true");
+    cursor.innerHTML = '<svg viewBox="0 0 28 30"><path d="M2 1.5 4 27l7-8 5 9 4-2-5-9 10-1.5Z"/></svg>';
+    document.body.appendChild(cursor);
+    document.documentElement.classList.add("smooth-cursor-active");
+    var tx = 0, ty = 0, x = 0, y = 0, vx = 0, vy = 0, active = false, raf = 0;
+    function move(e) { tx = e.clientX; ty = e.clientY; if (!active) { x = tx; y = ty; active = true; cursor.classList.add("visible"); } if (!raf) raf = requestAnimationFrame(step); }
+    function step() {
+      var dx = tx - x, dy = ty - y;
+      if (reduce) { x = tx; y = ty; } else { x += dx * .24; y += dy * .24; }
+      vx = dx; vy = dy;
+      var angle = (Math.atan2(vy, vx) * 180 / Math.PI) + 132;
+      cursor.style.transform = "translate3d(" + (x - 2) + "px," + (y - 2) + "px,0) rotate(" + angle + "deg)";
+      if (Math.abs(dx) + Math.abs(dy) > .15) raf = requestAnimationFrame(step); else raf = 0;
+    }
+    document.addEventListener("pointermove", move, { passive: true });
+    document.addEventListener("pointerover", function (e) { cursor.classList.toggle("hover", !!e.target.closest("a,button,[role='button']")); });
+    document.addEventListener("pointerout", function (e) { if (!e.relatedTarget) cursor.classList.remove("visible"); });
+  })();
+
+  /* ---------- footer eyes follow the pointer and blink ---------- */
+  var footerEyes = $$(".footer-eyes");
+  if (footerEyes.length) window.addEventListener("pointermove", function (e) {
+    footerEyes.forEach(function (eyes) {
+      var r = eyes.getBoundingClientRect();
+      eyes.style.setProperty("--pupil-x", clamp((e.clientX - (r.left + r.width / 2)) / 22, -8, 8) + "px");
+      eyes.style.setProperty("--pupil-y", clamp((e.clientY - (r.top + r.height / 2)) / 26, -5, 5) + "px");
+    });
+  }, { passive: true });
+
+  /* ---------- Playground: unfoldable paper print and click-wheel iPod ---------- */
+  (function playgroundExtras() {
+    var paper = $("#paperReveal"), paperButton = paper && $(".paper-trigger", paper);
+    if (paperButton) {
+      paperButton.addEventListener("pointerdown", function (e) { e.stopPropagation(); });
+      paperButton.addEventListener("click", function () {
+        var open = paper.classList.toggle("revealed");
+        paperButton.setAttribute("aria-expanded", open ? "true" : "false");
+        paperButton.setAttribute("aria-label", open ? "Crumple the photograph again" : "Unfold the crumpled paper photograph");
+      });
+    }
+
+    var ipod = $("#ipodWidget"); if (!ipod) return;
+    var names = ["Soft Focus", "Paper Planes", "Golden Hour", "Night Walk"];
+    var patterns = [
+      [523.25, 659.25, 783.99, 659.25, 587.33, 659.25, 440, 523.25],
+      [392, 493.88, 587.33, 659.25, 587.33, 493.88, 440, 392],
+      [440, 554.37, 659.25, 880, 659.25, 587.33, 493.88, 440],
+      [349.23, 440, 523.25, 587.33, 523.25, 440, 392, 349.23]
+    ];
+    var selected = 0, playing = false, screen = "now-playing", step = 0, elapsed = 0;
+    var audio = null, master = null, tuneTimer = 0, clockTimer = 0;
+    var title = $("[data-ipod-title]", ipod), time = $("[data-ipod-time]", ipod), progress = $("[data-ipod-progress]", ipod), playButton = $("[data-ipod='play']", ipod);
+    function drawPlayer() {
+      ipod.dataset.screen = screen;
+      title.textContent = names[selected];
+      time.textContent = Math.floor(elapsed / 60) + ":" + ("0" + elapsed % 60).slice(-2);
+      progress.style.width = clamp(elapsed / 120 * 100, 0, 100) + "%";
+      playButton.textContent = playing ? "Ⅱ" : "▶︎";
+      playButton.setAttribute("aria-label", playing ? "Pause" : "Play");
+      playButton.setAttribute("aria-pressed", playing ? "true" : "false");
+      $$(".ipod-menu-list li", ipod).forEach(function (row, i) {
+        row.classList.toggle("selected", i === selected); row.textContent = names[i];
+      });
+    }
+    function audioEngine() {
+      if (audio) return true;
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return false;
+      audio = new AudioContext(); master = audio.createGain(); master.gain.value = .13; master.connect(audio.destination); return true;
+    }
+    function note(frequency, duration) {
+      if (!audio || !master) return;
+      var osc = audio.createOscillator(), gain = audio.createGain(), now = audio.currentTime;
+      osc.type = "triangle"; osc.frequency.setValueAtTime(frequency, now);
+      gain.gain.setValueAtTime(.0001, now); gain.gain.exponentialRampToValueAtTime(.075, now + .035); gain.gain.exponentialRampToValueAtTime(.0001, now + duration);
+      osc.connect(gain); gain.connect(master); osc.start(now); osc.stop(now + duration + .02);
+    }
+    function tick() {
+      var tune = patterns[selected]; note(tune[step % tune.length], .34);
+      if (step % 4 === 0) note(tune[(step + 3) % tune.length] / 2, .56);
+      step++;
+    }
+    function setPlaying(on) {
+      if (on === playing) return;
+      if (on) {
+        if (!audioEngine()) return;
+        audio.resume(); master.gain.setTargetAtTime(.13, audio.currentTime, .06); playing = true; tick(); tuneTimer = window.setInterval(tick, 420);
+        clockTimer = window.setInterval(function () { elapsed = (elapsed + 1) % 120; drawPlayer(); }, 1000);
+      } else {
+        playing = false; window.clearInterval(tuneTimer); window.clearInterval(clockTimer);
+        if (audio && master) master.gain.setTargetAtTime(.0001, audio.currentTime, .06);
+      }
+      drawPlayer();
+    }
+    function changeTrack(direction) { selected = (selected + direction + names.length) % names.length; step = 0; elapsed = 0; drawPlayer(); if (playing) tick(); }
+    ipod.addEventListener("pointerdown", function (e) { e.stopPropagation(); });
+    ipod.addEventListener("click", function (e) {
+      var row = e.target.closest(".ipod-menu-list li");
+      if (row) { selected = $$(".ipod-menu-list li", ipod).indexOf(row); screen = "now-playing"; elapsed = 0; drawPlayer(); return; }
+      var control = e.target.closest("[data-ipod]"); if (!control) return;
+      var action = control.getAttribute("data-ipod");
+      if (action === "menu") { screen = screen === "menu" ? "now-playing" : "menu"; drawPlayer(); }
+      else if (action === "previous") changeTrack(-1);
+      else if (action === "next") changeTrack(1);
+      else if (action === "play") setPlaying(!playing);
+      else if (action === "select") {
+        if (screen === "menu") { screen = "now-playing"; elapsed = 0; drawPlayer(); }
+        else { screen = "menu"; drawPlayer(); }
+      }
+    });
+    var wheel = $(".ipod-wheel", ipod), startAngle = null;
+    wheel.addEventListener("pointerdown", function (e) {
+      if (e.target.closest("button")) return;
+      try { wheel.setPointerCapture(e.pointerId); } catch (err) {}
+      var r = wheel.getBoundingClientRect(); startAngle = Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2));
+    });
+    wheel.addEventListener("pointerup", function (e) {
+      if (startAngle === null) return;
+      var r = wheel.getBoundingClientRect(), end = Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2));
+      var delta = Math.atan2(Math.sin(end - startAngle), Math.cos(end - startAngle));
+      if (Math.abs(delta) > .22) changeTrack(delta > 0 ? 1 : -1);
+      startAngle = null;
+    });
+    wheel.addEventListener("pointercancel", function () { startAngle = null; });
+    drawPlayer();
+  })();
+
   /* ---------- persistent light/dark theme, toggled from the navbar smiley ---------- */
   var themeToggle = $(".nav-logo");
   if (themeToggle) {
     var themeAnimating = false;
-    function playThemeBrush(nextTheme) {
+    function playThemeReveal(nextTheme) {
       if (reduce) { syncTheme(nextTheme, true); themeAnimating = false; return; }
-      var oldBrush = $(".theme-brush");
-      if (oldBrush) oldBrush.remove();
-      var brush = document.createElement("div");
-      brush.className = "theme-brush";
-      brush.setAttribute("aria-hidden", "true");
-      brush.style.setProperty("--brush-color", nextTheme === "dark" ? "#111113" : "#fafafa");
-      brush.style.setProperty("--brush-detail", nextTheme === "dark" ? "#34343a" : "#d8b300");
-      brush.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><filter id="oil-brush-edge" x="-12%" y="-12%" width="124%" height="124%"><feTurbulence type="fractalNoise" baseFrequency=".055" numOctaves="2" seed="7" result="paint-grain"/><feDisplacementMap in="SourceGraphic" in2="paint-grain" scale="1.2" xChannelSelector="R" yChannelSelector="G"/></filter></defs><path class="oil-stroke oil-base" d="M-22 -24 C7 -13 13 7 30 23 S67 76 122 124"/><path class="oil-stroke oil-bristle bristle-one" d="M-24 -28 C5 -14 12 7 28 21 S64 73 118 121"/><path class="oil-stroke oil-bristle bristle-two" d="M-20 -20 C10 -7 17 10 34 27 S71 80 125 116"/><path class="oil-stroke oil-bristle bristle-three" d="M-27 -18 C1 -6 9 12 25 29 S62 79 115 128"/><path class="oil-stroke oil-bristle bristle-four" d="M-17 -30 C15 -14 21 4 39 19 S75 71 120 114"/></svg>';
-      var strokeCount = brush.querySelectorAll(".oil-stroke").length, finishedStrokes = 0, revealed = false;
-      function revealTheme() {
-        if (revealed) return;
-        revealed = true;
-        syncTheme(nextTheme, true);
-        brush.classList.add("reveal");
-        window.setTimeout(function () { if (brush.isConnected) brush.remove(); themeAnimating = false; }, 520);
+      var oldReveal = $(".theme-reveal"); if (oldReveal) oldReveal.remove();
+      var rect = themeToggle.getBoundingClientRect(), ox = rect.left + rect.width / 2, oy = rect.top + rect.height / 2;
+      var radius = Math.ceil(Math.max(Math.hypot(ox, oy), Math.hypot(window.innerWidth - ox, oy), Math.hypot(ox, window.innerHeight - oy), Math.hypot(window.innerWidth - ox, window.innerHeight - oy)) + 8);
+      var overlay = document.createElement("div"); overlay.className = "theme-reveal"; overlay.setAttribute("aria-hidden", "true");
+      overlay.style.background = nextTheme === "dark" ? "#111113" : "#fafafa";
+      overlay.style.clipPath = "circle(0px at " + ox + "px " + oy + "px)";
+      document.body.appendChild(overlay);
+      var complete = false;
+      function finish() {
+        if (complete) return; complete = true; syncTheme(nextTheme, true);
+        if (overlay.animate) {
+          var fade = overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 280, easing: "ease-out", fill: "forwards" });
+          var cleaned = false;
+          function cleanup() { if (cleaned) return; cleaned = true; overlay.remove(); themeAnimating = false; }
+          fade.onfinish = cleanup;
+          window.setTimeout(cleanup, 380);
+        } else { overlay.remove(); themeAnimating = false; }
       }
-      brush.addEventListener("animationend", function (event) {
-        if (event.animationName !== "oil-brush-draw" || !event.target.classList.contains("oil-stroke")) return;
-        finishedStrokes++;
-        if (finishedStrokes === strokeCount) revealTheme();
-      });
-      document.body.appendChild(brush);
-      window.setTimeout(revealTheme, 1050);
+      if (overlay.animate) {
+        var wipe = overlay.animate([{ clipPath: "circle(0px at " + ox + "px " + oy + "px)" }, { clipPath: "circle(" + radius + "px at " + ox + "px " + oy + "px)" }], { duration: 760, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" });
+        wipe.onfinish = finish;
+      } else { overlay.style.clipPath = "circle(" + radius + "px at " + ox + "px " + oy + "px)"; window.setTimeout(finish, 800); }
+      window.setTimeout(finish, 980);
     }
     function syncTheme(theme, persist) {
       if (theme === "dark") document.documentElement.dataset.theme = "dark";
@@ -47,6 +213,7 @@
       themeToggle.setAttribute("aria-pressed", dark ? "true" : "false");
       var themeColor = $("meta[name='theme-color']");
       if (themeColor) themeColor.setAttribute("content", dark ? "#111113" : "#fafafa");
+      window.dispatchEvent(new Event("gargi-themechange"));
       if (persist) try { localStorage.setItem("gargi-theme", dark ? "dark" : "light"); } catch (e) {}
     }
     syncTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false);
@@ -55,7 +222,7 @@
       var previousTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
       var nextTheme = previousTheme === "dark" ? "light" : "dark";
       themeAnimating = true;
-      playThemeBrush(nextTheme);
+      playThemeReveal(nextTheme);
     });
   }
 

@@ -28,13 +28,39 @@
 <div class="pg-view" aria-label="Draggable canvas of side projects">
   <div class="pg-canvas">
     <div class="pg-title"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.3-1.3a2.4 2.4 0 0 0-3.4 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/></svg><h1>Playground</h1><p>Old work, side projects<br>&amp; random explorations</p></div>
+    <div class="pg-paper-widget" id="paperReveal">
+      <svg aria-hidden="true" width="0" height="0" style="position:absolute"><defs><filter id="paper-crumple-filter" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".07" numOctaves="2" seed="5" result="paper-noise"/><feDisplacementMap in="SourceGraphic" in2="paper-noise" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
+      <button class="paper-trigger" type="button" aria-expanded="false" aria-label="Unfold the crumpled paper photograph">
+        <span class="paper-sheet"><span class="paper-photo"><img src="assets/bh-azulejos.jpg" alt="" draggable="false"></span><span class="paper-ball" aria-hidden="true"></span><span class="paper-instruction">Tap to unfold</span></span>
+      </button>
+      <p><b>Crumpled paper reveal</b><br>Tap to unfold</p>
+    </div>
+    <div class="pg-ipod" id="ipodWidget" data-screen="now-playing">
+      <div class="ipod-shell">
+        <div class="ipod-screen" aria-live="polite">
+          <div class="ipod-status"><span>GARGI'S IPOD</span><i class="ipod-battery" aria-hidden="true"></i></div>
+          <div class="ipod-now"><small>NOW PLAYING</small><strong data-ipod-title>Soft Focus</strong><em>Original loop · 01</em></div>
+          <ul class="ipod-menu-list" aria-label="Playlist"><li class="selected">Soft Focus</li><li>Paper Planes</li><li>Golden Hour</li><li>Night Walk</li></ul>
+          <div class="ipod-progress"><i data-ipod-progress></i></div>
+          <div class="ipod-time"><span data-ipod-time>0:00</span><span>2:00</span></div>
+        </div>
+        <div class="ipod-wheel" role="group" aria-label="iPod click wheel">
+          <button class="ipod-menu-key" type="button" data-ipod="menu" aria-label="Menu">MENU</button>
+          <button class="ipod-prev-key" type="button" data-ipod="previous" aria-label="Previous track">‹</button>
+          <button class="ipod-next-key" type="button" data-ipod="next" aria-label="Next track">›</button>
+          <button class="ipod-play-key" type="button" data-ipod="play" aria-label="Play">▶︎</button>
+          <button class="ipod-center-key" type="button" data-ipod="select" aria-label="Select">●</button>
+        </div>
+      </div>
+      <p class="pg-ipod-caption">Click wheel · tiny original tunes</p>
+    </div>
     <a class="pg-item" href="playground-rotaract.html" style="left:-600px;top:-300px;--r:-4deg" draggable="false"><div class="frame" data-i="R" style="width:300px;height:380px"><img src="assets/Rotract_Khopoli_logo.png" alt="" draggable="false" style="object-fit:contain" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p><b>Rotaract Club of Khopoli</b><br>International Service Director &amp; Creative Head · RID 3131 · 2026 – now</p></a><a class="pg-item" href="playground-rang-e-lotus.html" style="left:-120px;top:-430px;--r:3deg" draggable="false"><div class="frame" data-i="R" style="width:260px;height:260px"><img src="assets/bh-rang.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p><b>Rang-e-Lotus</b><br>Leather craft, research and visual identity</p></a><a class="pg-item" href="playground-museums-heritage.html" style="left:430px;top:-330px;--r:-2deg" draggable="false"><div class="frame" data-i="A" style="width:340px;height:260px"><img src="assets/internship-cover.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p><b>Internship work at Archaeology</b><br>Directorate of Archaeology and Museums Maharashtra</p></a><a class="pg-item" href="playground-illustrations.html" style="left:760px;top:-60px;--r:5deg" draggable="false"><div class="frame" data-i="I" style="width:250px;height:320px"><img src="assets/play-4.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p><b>Illustrations</b><br>Personal illustration studies</p></a><a class="pg-item" href="playground-film-photography.html" style="left:-780px;top:120px;--r:2deg" draggable="false"><div class="frame" data-i="F" style="width:320px;height:240px"><img src="assets/bh-anjana.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p><b>Film &amp; photography</b><br>Shooting and editing for fun</p></a><a class="pg-item" href="playground-craft-design.html" style="left:-250px;top:330px;--r:-3deg" draggable="false"><div class="frame" data-i="C" style="width:300px;height:300px"><img src="assets/bh-rang.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p><b>Craft design</b><br>Researching Indian making traditions</p></a><a class="pg-item" href="taks.html" style="left:330px;top:300px;--r:4deg" draggable="false"><div class="frame" data-i="T" style="width:330px;height:260px"><img src="assets/bh-taks.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p>Taks: Type Design <span class="muted">(2026)</span></p></a><a class="pg-item" href="noto-sans.html" style="left:1110px;top:-390px;--r:-3deg" draggable="false"><div class="frame" data-i="N" style="width:270px;height:300px"><img src="assets/bh-noto.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p>Noto Sans: A Typeface for the World <span class="muted">(2025)</span></p></a><a class="pg-item" href="azulejos-goa.html" style="left:-1130px;top:-150px;--r:4deg" draggable="false"><div class="frame" data-i="A" style="width:250px;height:300px"><img src="assets/bh-azulejos.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p>Art of the Azulejos <span class="muted">(2026)</span></p></a><a class="pg-item" href="anjana.html" style="left:160px;top:690px;--r:2deg" draggable="false"><div class="frame" data-i="A" style="width:300px;height:260px"><img src="assets/bh-anjana.jpg" alt="" draggable="false" style="object-fit:cover" onerror="this.style.display='none';this.parentNode.classList.add('missing')"></div><p>Anjana: A Non-Narrative Film <span class="muted">(2025)</span></p></a>
     <svg class="pg-ink" width="1" height="1" aria-hidden="true"><g id="pgInk"></g></svg>
     <div class="pg-stickers" id="pgStickers"></div>
   </div>
 </div>
 <div class="pg-fx" id="pgFx" aria-hidden="true"></div>
-<div class="pg-hint" id="pgHint"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="m5 9-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg><span>Drag to move around. Try the pen, stickers and rain below</span></div>
+<div class="pg-hint" id="pgHint"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="m5 9-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg><span>Drag to explore · unfold the paper print · try the iPod, pen and stickers</span></div>
 <div class="pg-toy" role="toolbar" aria-label="Playground toys">
   <div class="pg-pop" id="popPen" role="group" aria-label="Pen">
     <div class="pg-colors">
