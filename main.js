@@ -81,8 +81,8 @@
       eyes.forEach(function (eye) {
         var r = eye.getBoundingClientRect(); if (r.bottom < -200 || r.top > window.innerHeight + 200) return;
         var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-        var dx = ptr.x - cx, dy = ptr.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(8, d / 14);
-        eye.firstElementChild.style.transform = "translate(" + (dx / d) * m * 0.8 + "px," + (dy / d) * m + "px)";
+        var dx = ptr.x - cx, dy = ptr.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(6, d / 14);
+        eye.firstElementChild.style.transform = "translate(" + (dx / d) * m * 0.8 + "px," + (dy / d) * m * 0.5 + "px)";
       });
     };
     window.addEventListener("pointermove", function (e) { ptr = { x: e.clientX, y: e.clientY }; if (!eyeRaf) eyeRaf = requestAnimationFrame(moveEyes); }, { passive: true });
@@ -181,12 +181,13 @@
       var m = /matrix\(([-\d.]+)/.exec(getComputedStyle(deck).transform), sc = m ? parseFloat(m[1]) || 1 : 1;
       var avail = Math.max(0, stage.clientWidth / sc - deck.offsetWidth - 150), step = n > 1 ? clamp(avail / (n - 1), 26, 104) : 0;
       cards.forEach(function (c, i) {
+        var slot = i === 0 ? 0 : Math.ceil(i / 2) * (i % 2 ? -1 : 1);
         c.style.zIndex = n - i;
         c.style.setProperty("--sx", (i * 5) + "px"); c.style.setProperty("--sy", (i * 5) + "px");
         c.style.setProperty("--sr", (ROT[i % ROT.length]) + "deg");
-        c.style.setProperty("--fx", ((i - mid) * step).toFixed(1) + "px");
-        c.style.setProperty("--fy", (Math.abs(i - mid) * 18).toFixed(1) + "px");
-        c.style.setProperty("--fr", ((i - mid) * Math.min(5, 28 / Math.max(1, mid))).toFixed(2) + "deg");
+        c.style.setProperty("--fx", (slot * step).toFixed(1) + "px");
+        c.style.setProperty("--fy", (Math.abs(slot) * 18).toFixed(1) + "px");
+        c.style.setProperty("--fr", (slot * Math.min(5, 28 / Math.max(1, mid))).toFixed(2) + "deg");
         c.tabIndex = i === 0 || mode === "fan" ? 0 : -1;
         c.style.transform = "";
       });
@@ -267,7 +268,13 @@
       window.addEventListener("resize", layout);
       document.body.appendChild(box);                  /* lightbox lives on <body> so nothing can clip it */
       layout();
-      /* Keep the seven photo cards stacked on the About hero. */
+      /* Open the closed stack into a balanced fan once the images are ready. */
+      if (reduce) { setMode("fan"); return; }
+      setTimeout(function () {
+        cards.forEach(function (c, i) { c.style.setProperty("--td", (i * 55) + "ms"); });
+        setMode("fan");
+        setTimeout(function () { cards.forEach(function (c) { c.style.removeProperty("--td"); }); }, 1100);
+      }, 650);
     }
     // wait until every image has loaded or failed (failed optional cards remove themselves), then start
     if (document.readyState === "complete") init(); else window.addEventListener("load", init);
