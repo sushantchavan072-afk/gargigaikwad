@@ -11,15 +11,32 @@
   /* ---------- persistent light/dark theme, toggled from the navbar smiley ---------- */
   var themeToggle = $(".nav-logo");
   if (themeToggle) {
-    function playThemeBrush(previousTheme) {
+    var themeAnimating = false;
+    function playThemeBrush(nextTheme) {
+      if (reduce) { syncTheme(nextTheme, true); themeAnimating = false; return; }
       var oldBrush = $(".theme-brush");
       if (oldBrush) oldBrush.remove();
       var brush = document.createElement("div");
       brush.className = "theme-brush";
       brush.setAttribute("aria-hidden", "true");
-      brush.style.setProperty("--brush-color", previousTheme === "dark" ? "#111113" : "#fafafa");
+      brush.style.setProperty("--brush-color", nextTheme === "dark" ? "#111113" : "#fafafa");
+      brush.style.setProperty("--brush-detail", nextTheme === "dark" ? "#34343a" : "#d8b300");
+      brush.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><filter id="oil-brush-edge" x="-12%" y="-12%" width="124%" height="124%"><feTurbulence type="fractalNoise" baseFrequency=".055" numOctaves="2" seed="7" result="paint-grain"/><feDisplacementMap in="SourceGraphic" in2="paint-grain" scale="1.2" xChannelSelector="R" yChannelSelector="G"/></filter></defs><path class="oil-stroke oil-base" d="M-22 -24 C7 -13 13 7 30 23 S67 76 122 124"/><path class="oil-stroke oil-bristle bristle-one" d="M-24 -28 C5 -14 12 7 28 21 S64 73 118 121"/><path class="oil-stroke oil-bristle bristle-two" d="M-20 -20 C10 -7 17 10 34 27 S71 80 125 116"/><path class="oil-stroke oil-bristle bristle-three" d="M-27 -18 C1 -6 9 12 25 29 S62 79 115 128"/><path class="oil-stroke oil-bristle bristle-four" d="M-17 -30 C15 -14 21 4 39 19 S75 71 120 114"/></svg>';
+      var strokeCount = brush.querySelectorAll(".oil-stroke").length, finishedStrokes = 0, revealed = false;
+      function revealTheme() {
+        if (revealed) return;
+        revealed = true;
+        syncTheme(nextTheme, true);
+        brush.classList.add("reveal");
+        window.setTimeout(function () { if (brush.isConnected) brush.remove(); themeAnimating = false; }, 520);
+      }
+      brush.addEventListener("animationend", function (event) {
+        if (event.animationName !== "oil-brush-draw" || !event.target.classList.contains("oil-stroke")) return;
+        finishedStrokes++;
+        if (finishedStrokes === strokeCount) revealTheme();
+      });
       document.body.appendChild(brush);
-      window.setTimeout(function () { if (brush.isConnected) brush.remove(); }, 1350);
+      window.setTimeout(revealTheme, 1050);
     }
     function syncTheme(theme, persist) {
       if (theme === "dark") document.documentElement.dataset.theme = "dark";
@@ -34,9 +51,11 @@
     }
     syncTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false);
     themeToggle.addEventListener("click", function () {
+      if (themeAnimating) return;
       var previousTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-      syncTheme(previousTheme === "dark" ? "light" : "dark", true);
-      playThemeBrush(previousTheme);
+      var nextTheme = previousTheme === "dark" ? "light" : "dark";
+      themeAnimating = true;
+      playThemeBrush(nextTheme);
     });
   }
 
