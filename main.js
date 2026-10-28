@@ -11,17 +11,15 @@
   /* ---------- persistent light/dark theme, toggled from the navbar smiley ---------- */
   var themeToggle = $(".nav-logo");
   if (themeToggle) {
-    function playThemeBrush() {
+    function playThemeBrush(previousTheme) {
       var oldBrush = $(".theme-brush");
       if (oldBrush) oldBrush.remove();
-      var brush = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      brush.setAttribute("class", "theme-brush");
-      brush.setAttribute("viewBox", "0 0 1000 1000");
-      brush.setAttribute("preserveAspectRatio", "none");
+      var brush = document.createElement("div");
+      brush.className = "theme-brush";
       brush.setAttribute("aria-hidden", "true");
-      brush.innerHTML = '<path class="brush-wide" d="M-150 60 C90 -15 145 105 360 160 S760 265 1160 505"/><path class="brush-mid" d="M-135 28 C80 -20 155 82 375 132 S770 240 1130 465"/><path class="brush-dry" d="M-130 96 C95 12 175 135 390 188 S735 286 1080 525"/><path class="brush-dry brush-dry-two" d="M-105 48 C90 2 160 105 315 145 S600 222 865 345"/>';
+      brush.style.setProperty("--brush-color", previousTheme === "dark" ? "#111113" : "#fafafa");
       document.body.appendChild(brush);
-      window.setTimeout(function () { if (brush.isConnected) brush.remove(); }, 1100);
+      window.setTimeout(function () { if (brush.isConnected) brush.remove(); }, 1350);
     }
     function syncTheme(theme, persist) {
       if (theme === "dark") document.documentElement.dataset.theme = "dark";
@@ -36,8 +34,9 @@
     }
     syncTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false);
     themeToggle.addEventListener("click", function () {
-      syncTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true);
-      playThemeBrush();
+      var previousTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+      syncTheme(previousTheme === "dark" ? "light" : "dark", true);
+      playThemeBrush(previousTheme);
     });
   }
 

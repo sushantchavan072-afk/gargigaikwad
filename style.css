@@ -550,17 +550,12 @@ body.pg{height:100vh;height:100svh}
 :root[data-theme="dark"] .soon-i{color:rgba(255,255,255,.32)}
 :root[data-theme="dark"] .cs-icon.missing::after{color:var(--zinc-50)}
 
-/* A short, pointer-free brand brush sweep accompanies either theme change. */
-.theme-brush{position:fixed;inset:0;z-index:9999;width:100vw;height:100vh;overflow:visible;pointer-events:none}
-.theme-brush path{fill:none;stroke:#fdcf00;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2200;stroke-dashoffset:2200;animation:theme-brush-draw .82s cubic-bezier(.2,.7,.25,1) forwards;vector-effect:non-scaling-stroke}
-.theme-brush .brush-wide{stroke-width:78;--brush-opacity:.22}
-.theme-brush .brush-mid{stroke-width:46;--brush-opacity:.3;animation-delay:.035s}
-.theme-brush .brush-dry{stroke-width:17;--brush-opacity:.48;animation-delay:.08s}
-.theme-brush .brush-dry-two{stroke-width:10;animation-delay:.12s}
-@keyframes theme-brush-draw{
-  0%{stroke-dashoffset:2200;opacity:0;transform:translate(-18px,-18px)}
-  14%{opacity:var(--brush-opacity)}
-  78%{stroke-dashoffset:0;opacity:var(--brush-opacity);transform:translate(0,0)}
-  100%{stroke-dashoffset:0;opacity:0;transform:translate(6px,6px)}
+/* A page-covering, rough-edged paint wipe accompanies either theme change. */
+.theme-brush{position:fixed;inset:0;z-index:9999;pointer-events:none;background:var(--brush-color);animation:theme-brush-wipe 1.15s cubic-bezier(.2,.72,.24,1) forwards}
+@keyframes theme-brush-wipe{
+  0%{opacity:1;clip-path:polygon(-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%,-15% -15%)}
+  70%{opacity:1;clip-path:polygon(-15% -15%,78% -15%,75% -9%,83% -5%,73% 1%,79% 6%,66% 11%,63% 17%,56% 14%,50% 26%,42% 30%,35% 36%,28% 33%,21% 45%,15% 48%,11% 58%,7% 62%,-2% 67%,-8% 80%,-15% 92%,-15% 100%,-15% 100%)}
+  86%{opacity:1;clip-path:polygon(-15% -15%,115% -15%,112% -8%,118% -4%,110% 2%,116% 8%,108% 12%,112% 19%,102% 24%,110% 32%,102% 39%,108% 46%,98% 52%,103% 60%,95% 64%,100% 72%,92% 77%,96% 84%,89% 91%,90% 98%,84% 105%,-15% 105%)}
+  100%{opacity:0;clip-path:polygon(-15% -15%,115% -15%,112% -8%,118% -4%,110% 2%,116% 8%,108% 12%,112% 19%,102% 24%,110% 32%,102% 39%,108% 46%,98% 52%,103% 60%,95% 64%,100% 72%,92% 77%,96% 84%,89% 91%,90% 98%,84% 105%,-15% 105%)}
 }
-@media(prefers-reduced-motion:reduce){.theme-brush path{animation-duration:.01ms;animation-delay:0ms}}
+@media(prefers-reduced-motion:reduce){.theme-brush{animation-duration:.01ms}}
