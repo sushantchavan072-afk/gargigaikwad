@@ -549,3 +549,18 @@ body.pg{height:100vh;height:100svh}
 :root[data-theme="dark"] #wgrid:before{background:rgba(28,28,32,.94)}
 :root[data-theme="dark"] .soon-i{color:rgba(255,255,255,.32)}
 :root[data-theme="dark"] .cs-icon.missing::after{color:var(--zinc-50)}
+
+/* A short, pointer-free brand brush sweep accompanies either theme change. */
+.theme-brush{position:fixed;inset:0;z-index:9999;width:100vw;height:100vh;overflow:visible;pointer-events:none}
+.theme-brush path{fill:none;stroke:#fdcf00;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2200;stroke-dashoffset:2200;animation:theme-brush-draw .82s cubic-bezier(.2,.7,.25,1) forwards;vector-effect:non-scaling-stroke}
+.theme-brush .brush-wide{stroke-width:78;--brush-opacity:.22}
+.theme-brush .brush-mid{stroke-width:46;--brush-opacity:.3;animation-delay:.035s}
+.theme-brush .brush-dry{stroke-width:17;--brush-opacity:.48;animation-delay:.08s}
+.theme-brush .brush-dry-two{stroke-width:10;animation-delay:.12s}
+@keyframes theme-brush-draw{
+  0%{stroke-dashoffset:2200;opacity:0;transform:translate(-18px,-18px)}
+  14%{opacity:var(--brush-opacity)}
+  78%{stroke-dashoffset:0;opacity:var(--brush-opacity);transform:translate(0,0)}
+  100%{stroke-dashoffset:0;opacity:0;transform:translate(6px,6px)}
+}
+@media(prefers-reduced-motion:reduce){.theme-brush path{animation-duration:.01ms;animation-delay:0ms}}
