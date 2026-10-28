@@ -168,13 +168,13 @@ Change the commit message to briefly describe your update. `git push` sends the 
 
 - **`gh: command not found` or `vercel: command not found`:** install the tool, close Git Bash, and open it again.
 - **`Author identity unknown`:** run the two `git config --global` commands in Step 3 with your own details, then make the commit again.
-- **`remote origin already exists`:** a remote is already configured. Run `git remote -v` and do not repeat the `gh repo create` command; use the existing remote with `git push -u origin main` if it points to the right GitHub repository.
+- **`remote origin already exists`:** run `git remote -v` to see where it points. If needed, update it with the `git remote set-url origin ...` command in Step 4.
 - **GitHub CLI login prompt behaves strangely in Git Bash:** try `winpty gh auth login`, or run `gh auth login` in Windows Terminal.
 - **Vercel displays a 404:** confirm you ran `vercel --prod` from the folder that directly contains `index.html`.
 
 ## Alternative: GitHub Desktop (no terminal)
 
-Use this route if you prefer buttons. It makes a new working copy, so you can keep the original folder as a backup.
+Use this route if you prefer buttons. It clones the GitHub repository to your computer, then copies the site into that working copy.
 
 ### 1. Sign in to GitHub Desktop
 
@@ -182,25 +182,22 @@ Use this route if you prefer buttons. It makes a new working copy, so you can ke
 2. Choose **Sign in to GitHub.com** and follow the browser sign-in steps.
 3. Return to GitHub Desktop after it says you are signed in.
 
-### 2. Create a repository on your computer
+### 2. Clone your GitHub repository
 
-1. In GitHub Desktop, choose **File → New repository…**.
-2. Enter a name such as `gargigaikwad`.
-3. For **Local path**, choose a folder where you want to keep your website repository, such as `C:\Users\HP\Documents`.
-   - GitHub Desktop creates a new folder named `gargigaikwad` inside that location.
-4. Leave **Initialize this repository with a README** unchecked. The site already has its own README.
-5. Click **Create repository**.
+1. In GitHub Desktop, choose **File → Clone repository…**.
+2. Select `sushantchavan072-afk/gargigaikwad` from the GitHub.com list.
+3. Choose a local path, such as `C:\Users\HP\Documents`, and click **Clone**.
 
-### 3. Copy the website into the new repository
+### 3. Copy the website into the cloned repository
 
 1. Open the original `site` folder in File Explorer:
    `C:\Users\HP\Downloads\gargi-portfolio-v9\site`
 2. Select everything inside it, including the folders `assets`, `fonts`, and `vendor`.
 3. Copy the selected files and folders.
-4. Open the new `gargigaikwad` folder you just created.
+4. Open the cloned `gargigaikwad` folder.
 5. Paste the files there. The new folder should have `index.html` directly inside it, alongside `style.css` and `main.js`.
 
-From now on, edit the copy inside `gargigaikwad`. GitHub Desktop watches that folder for changes. The original `site` folder is just your backup.
+From now on, edit the copy inside the cloned `gargigaikwad` folder. GitHub Desktop watches that folder for changes. The original `site` folder is just your backup.
 
 ### 4. Save the first version (make a commit)
 
@@ -210,16 +207,13 @@ From now on, edit the copy inside `gargigaikwad`. GitHub Desktop watches that fo
 
 A **commit** is a saved checkpoint of your files on your computer. It has not been uploaded yet.
 
-### 5. Publish the repository to GitHub
+### 5. Upload the changes to GitHub
 
-1. Click **Publish repository** in the top bar.
-2. Give the repository the name `gargigaikwad`.
-3. Choose whether the code repository should be **Private** or **Public**.
-   - A private GitHub repository can still power a public Vercel website.
-   - Choose public only if you want other people to browse the source files.
-4. Click **Publish repository**.
+1. Return to GitHub Desktop and review the copied files in the **Changes** list.
+2. Enter a summary such as `Add portfolio website` and click **Commit to main**.
+3. Click **Push origin** in the top bar.
 
-GitHub Desktop uploads the commit. To check, click **View on GitHub**. You should see `index.html`, `style.css`, `main.js`, and the asset folders in the repository.
+To check the upload, click **View on GitHub**. You should see `index.html`, `style.css`, `main.js`, and the asset folders in the repository.
 
 ## Part 2: Deploy the GitHub repository on Vercel
 
