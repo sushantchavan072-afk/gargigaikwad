@@ -24,6 +24,39 @@
   if (themeToggle) {
     var themeAnimating = false;
     var themeToast = null;
+    var transitionWords = [
+      { text: "Blooming", motion: "blooming" },
+      { text: "Brewing", motion: "brewing" },
+      { text: "Sprouting", motion: "sprouting" },
+      { text: "Fluttering", motion: "fluttering" },
+      { text: "Dreaming", motion: "dreaming" },
+      { text: "Wandering", motion: "wandering" },
+      { text: "Twinkling", motion: "twinkling" },
+      { text: "Wiggling", motion: "wiggling" },
+      { text: "Bubbling", motion: "bubbling" },
+      { text: "Hatching", motion: "hatching" },
+      { text: "Sparkling", motion: "sparkling" },
+      { text: "Glimmering", motion: "glimmering" },
+      { text: "Floating", motion: "floating" },
+      { text: "Doodling", motion: "doodling" },
+      { text: "Snoozing", motion: "snoozing" },
+      { text: "Purring", motion: "purring" },
+      { text: "Popping", motion: "popping" },
+      { text: "Simmering", motion: "simmering" },
+      { text: "Daydreaming", motion: "daydreaming" },
+      { text: "Unfolding", motion: "unfolding" }
+    ];
+    var transitionWordIndex = 0;
+    function nextTransitionWord() {
+      var index = transitionWordIndex;
+      try {
+        var savedIndex = parseInt(localStorage.getItem("gargi-theme-transition-word-index") || "0", 10);
+        if (isFinite(savedIndex) && savedIndex >= 0) index = savedIndex % transitionWords.length;
+        localStorage.setItem("gargi-theme-transition-word-index", String((index + 1) % transitionWords.length));
+      } catch (error) {}
+      transitionWordIndex = (index + 1) % transitionWords.length;
+      return transitionWords[index];
+    }
     function showThemeToast(theme) {
       if (themeAnimating) return;
       if (!themeToast) {
@@ -76,6 +109,7 @@
       if (typeof overlay.animate !== "function") { syncAndFinish(); return; }
 
       function closeOverlay() {
+        overlay.classList.remove("is-word-ready");
         overlay.classList.add("is-leaving");
         var close;
         try {
@@ -88,17 +122,20 @@
       }
       function typeTransitionNote() {
         var copy = $(".theme-transition-copy", overlay);
-        var message = "Wait, we're triangulating...";
+        var phrase = nextTransitionWord();
+        var message = phrase.text;
+        overlay.setAttribute("data-word-motion", phrase.motion);
         var index = 0;
         overlay.classList.add("is-typing");
         function typeNext() {
           if (!overlay.isConnected) return;
           if (index >= message.length) {
+            overlay.classList.add("is-word-ready");
             window.setTimeout(function () {
               if (!overlay.isConnected) return;
               syncTheme(nextTheme, true);
               closeOverlay();
-            }, 220);
+            }, 940);
             return;
           }
           copy.textContent = message.slice(0, ++index);
