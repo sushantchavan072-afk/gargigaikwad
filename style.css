@@ -496,6 +496,7 @@ body.pg{height:100vh;height:100svh}
 .xh-photo-fan.is-visible .xh-photo-stack{transform:rotate(-14deg) scale(1.2);opacity:1}
 .xh-photo-fan.is-settled .xh-photo-stack{transform:rotate(0deg) scale(1);transition:transform 1s cubic-bezier(.2,1.25,.4,1),opacity .2s ease}
 .xh-photo-fan.is-expanded .xh-photo-stack{transform:rotate(0deg) scale(1)}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-stack{transform:rotate(0deg) scale(1);opacity:1}
 .xh-photo-card{position:absolute;top:calc(50% - 115px);left:calc(50% - 92px);width:184px;height:230px;margin:0;overflow:hidden;border-radius:18px;background:#e8e5df;transform:rotate(0deg);transform-origin:50% 50%;transition:transform 1s cubic-bezier(.2,1.25,.4,1);will-change:transform;box-shadow:0 14px 36px rgba(20,20,20,.13)}
 .xh-photo-card img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover;transition:opacity .2s ease;pointer-events:none}
 .xh-photo-card--nandi,.xh-photo-card--prianca{overflow:visible}
@@ -506,6 +507,13 @@ body.pg{height:100vh;height:100svh}
 .xh-photo-fan.is-expanded .xh-photo-card:nth-child(5){transform:rotate(6deg)}
 .xh-photo-fan.is-expanded .xh-photo-card:nth-child(6){transform:rotate(10deg)}
 .xh-photo-fan.is-expanded .xh-photo-card:nth-child(7){transform:rotate(12deg)}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-card:nth-child(1){transform:rotate(-12deg)}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-card:nth-child(2){transform:rotate(-9deg)}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-card:nth-child(3){transform:rotate(-5deg)}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-card:nth-child(4){transform:rotate(0deg)}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-card:nth-child(5){transform:rotate(6deg)}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-card:nth-child(6){transform:rotate(10deg)}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-card:nth-child(7){transform:rotate(12deg)}
 .xh-photo-pin{position:absolute;z-index:2;top:-65px;display:flex;align-items:center;justify-content:center;gap:10px;width:max-content;height:min-content;padding:6px 10px;border-radius:15px;transform:scale(0);transform-origin:50% 50%;transition:transform 1s cubic-bezier(.2,1.25,.4,1),background-color .3s,color .3s;white-space:pre;font-family:var(--sans);font-size:18px;line-height:1;color:#fff}
 .xh-photo-pin--nandi{right:82px;background:#0080ff}
 .xh-photo-pin--prianca{right:30px;background:#d4d4d4;color:#050505}
@@ -520,4 +528,11 @@ body.pg{height:100vh;height:100svh}
 .xh-photo-fan.is-expanded .xh-photo-pin--prianca i{background:#f4f4f5}
 .xh-photo-fan.is-expanded .xh-photo-pin__short{display:none}
 .xh-photo-fan.is-expanded .xh-photo-pin__long{display:inline}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-pin{transform:scale(1);transition-delay:.4s}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-pin--nandi{background:#fdcf00;color:#27272a}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-pin--nandi i{background:#fdcf00}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-pin--prianca{background:#f4f4f5;color:#050505;transition-delay:.5s}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-pin--prianca i{background:#f4f4f5}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-pin__short{display:none}
+.xh-photo-stage:is(:hover,:focus-visible) .xh-photo-pin__long{display:inline}
 @media(prefers-reduced-motion:reduce){.xh-photo-stack,.xh-photo-card,.xh-photo-pin{transition:none!important}}
