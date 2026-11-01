@@ -488,8 +488,8 @@ body.pg{height:100vh;height:100svh}
 @media(prefers-reduced-motion:reduce){.theme-transition-message,.theme-transition-caret,.theme-mode-toast{animation:none;transition:none}}
 
 /* Xhulia's seven-photo fan motion, using Gargi's portrait */
-.gargi-photo-fan{position:relative;width:184px;height:184px;margin:68px auto 124px;overflow:visible}
-.gargi-photo-fan__stage{position:relative;width:184px;height:184px;isolation:isolate;overflow:visible;cursor:pointer;touch-action:manipulation;outline:none}
+.gargi-photo-fan{position:relative;width:min(560px,calc(100vw - 48px));height:184px;margin:68px auto 124px;overflow:visible}
+.gargi-photo-fan__stage{position:relative;width:100%;height:184px;isolation:isolate;overflow:visible;cursor:pointer;touch-action:manipulation;outline:none}
 .gargi-photo-fan__stage:focus-visible{outline:2px solid var(--yellow);outline-offset:10px;border-radius:18px}
 .gargi-photo-fan__stack{position:absolute;inset:0;overflow:visible;transform:rotate(0deg) scale(1);transform-origin:50% 50%;opacity:1;will-change:transform,opacity;transition:transform 2.4s cubic-bezier(.44,0,.56,1),opacity .4s ease}
 .gargi-photo-fan.is-pending:not(.is-visible) .gargi-photo-fan__stack{transform:rotate(-40deg) scale(1.2);opacity:0}
@@ -497,20 +497,22 @@ body.pg{height:100vh;height:100svh}
 .gargi-photo-fan.is-settled .gargi-photo-fan__stack{transform:rotate(0deg) scale(1);transition:transform 1s cubic-bezier(.2,1.25,.4,1),opacity .2s ease}
 .gargi-photo-fan.is-expanded .gargi-photo-fan__stack{transform:rotate(0deg) scale(1)}
 .gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__stack{transform:rotate(0deg) scale(1);opacity:1}
-.gargi-photo-fan__card{position:absolute;top:calc(50% - 115px);left:calc(50% - 92px);width:184px;height:230px;margin:0;overflow:hidden;border-radius:18px;background:#e8e5df;transform:rotate(0deg);transform-origin:50% 50%;transition:transform 1s cubic-bezier(.2,1.25,.4,1);will-change:transform;box-shadow:0 14px 36px rgba(20,20,20,.13)}
+.gargi-photo-fan__card{position:absolute;top:calc(50% - 115px);left:calc(50% - 92px);width:184px;height:230px;margin:0;overflow:hidden;border-radius:18px;background:#e8e5df;transform:translateX(0) rotate(0deg);transform-origin:50% 50%;transition:transform 1s cubic-bezier(.2,1.25,.4,1);will-change:transform;box-shadow:0 14px 36px rgba(20,20,20,.13)}
 .gargi-photo-fan__card img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover;transition:opacity .2s ease;pointer-events:none}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(1),
-.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(1){transform:rotate(-12deg)}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(2),
-.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(2){transform:rotate(-9deg)}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(3),
-.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(3){transform:rotate(-5deg)}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(4),
-.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(4){transform:rotate(0deg)}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(5),
-.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(5){transform:rotate(6deg)}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(6),
-.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(6){transform:rotate(10deg)}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(7),
-.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(7){transform:rotate(12deg)}
+.gargi-photo-fan__card:nth-child(1){--fan-x:-156px}
+.gargi-photo-fan__card:nth-child(2){--fan-x:-104px}
+.gargi-photo-fan__card:nth-child(3){--fan-x:-52px}
+.gargi-photo-fan__card:nth-child(4){--fan-x:0px}
+.gargi-photo-fan__card:nth-child(5){--fan-x:52px}
+.gargi-photo-fan__card:nth-child(6){--fan-x:104px}
+.gargi-photo-fan__card:nth-child(7){--fan-x:156px}
+.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(1),.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(1){transform:translateX(var(--fan-x)) rotate(-12deg)}
+.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(2),.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(2){transform:translateX(var(--fan-x)) rotate(-9deg)}
+.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(3),.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(3){transform:translateX(var(--fan-x)) rotate(-5deg)}
+.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(4),.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(4){transform:translateX(var(--fan-x)) rotate(0deg)}
+.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(5),.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(5){transform:translateX(var(--fan-x)) rotate(6deg)}
+.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(6),.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(6){transform:translateX(var(--fan-x)) rotate(10deg)}
+.gargi-photo-fan.is-expanded .gargi-photo-fan__card:nth-child(7),.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card:nth-child(7){transform:translateX(var(--fan-x)) rotate(12deg)}
+@media(max-width:660px){.gargi-photo-fan__card:nth-child(1){--fan-x:-72px}.gargi-photo-fan__card:nth-child(2){--fan-x:-48px}.gargi-photo-fan__card:nth-child(3){--fan-x:-24px}.gargi-photo-fan__card:nth-child(5){--fan-x:24px}.gargi-photo-fan__card:nth-child(6){--fan-x:48px}.gargi-photo-fan__card:nth-child(7){--fan-x:72px}}
+@media(max-width:380px){.gargi-photo-fan__card:nth-child(1){--fan-x:-48px}.gargi-photo-fan__card:nth-child(2){--fan-x:-32px}.gargi-photo-fan__card:nth-child(3){--fan-x:-16px}.gargi-photo-fan__card:nth-child(5){--fan-x:16px}.gargi-photo-fan__card:nth-child(6){--fan-x:32px}.gargi-photo-fan__card:nth-child(7){--fan-x:48px}}
 @media(prefers-reduced-motion:reduce){.gargi-photo-fan__stack,.gargi-photo-fan__card{transition:none!important}}
