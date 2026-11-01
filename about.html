@@ -29,16 +29,22 @@
   <section class="about-top">
     <h1 class="display">Hi, I’m Gargi.<br>I design <em>type, stories &amp; crafts</em>.</h1>
     <p class="small">Communication designer, based in Pune.</p>
-    <div class="gargi-photo-fan" data-gargi-photo-fan>
-      <div class="gargi-photo-fan__stage" data-photo-stage role="button" tabindex="0" aria-pressed="false" aria-label="Lift Gargi’s portrait cards">
-        <div class="gargi-photo-fan__stack" aria-hidden="true">
-          <figure class="gargi-photo-fan__card"><img src="assets/gargi.jpg" alt="" draggable="false"></figure>
-          <figure class="gargi-photo-fan__card"><img src="assets/gargi.jpg" alt="" draggable="false"></figure>
-          <figure class="gargi-photo-fan__card"><img src="assets/gargi.jpg" alt="" draggable="false"></figure>
-          <figure class="gargi-photo-fan__card"><img src="assets/gargi.jpg" alt="" draggable="false"></figure>
-          <figure class="gargi-photo-fan__card"><img src="assets/gargi.jpg" alt="" draggable="false"></figure>
-          <figure class="gargi-photo-fan__card"><img src="assets/gargi.jpg" alt="" draggable="false"></figure>
-          <figure class="gargi-photo-fan__card"><img src="assets/gargi.jpg" alt="" draggable="false"></figure>
+    <div class="img-anim-row">
+      <div class="img-anim-scale">
+        <div class="img-anim" data-img-anim role="group" aria-label="A fan of Gargi’s work">
+          <div class="img-anim__stack" data-name="Image Container">
+            <div class="img-anim__card" data-name="Image 7"><img src="assets/bh-taks.jpg" alt="Taks, a display typeface specimen" width="184" height="230" decoding="async" draggable="false"></div>
+            <div class="img-anim__card img-anim__card--pin" data-name="Image 6"><img src="assets/bh-azulejos.jpg" alt="Blue Goan azulejo tiles" width="184" height="230" decoding="async" draggable="false">
+              <div class="img-anim__pin img-anim__pin--2" data-name="Pin 2"><p>goa tiles</p><span class="img-anim__tail"></span></div>
+            </div>
+            <div class="img-anim__card" data-name="Image 5"><img src="assets/bh-noto.jpg" alt="Noto Sans typographic study" width="184" height="230" decoding="async" draggable="false"></div>
+            <div class="img-anim__card" data-name="Image 4"><img src="assets/bh-anjana.jpg" alt="Still from Anjana, a non-narrative film" width="184" height="230" decoding="async" draggable="false"></div>
+            <div class="img-anim__card" data-name="Image 3"><img src="assets/bh-rang.jpg" alt="Rang-e-Lotus leather craft" width="184" height="230" decoding="async" draggable="false"></div>
+            <div class="img-anim__card" data-name="Image 2"><img src="assets/play-4.jpg" alt="Icon design exploration" width="184" height="230" decoding="async" draggable="false"></div>
+            <div class="img-anim__card img-anim__card--pin" data-name="Image 1"><img src="assets/gargi.jpg" alt="Portrait of Gargi" width="184" height="230" decoding="async" draggable="false">
+              <div class="img-anim__pin img-anim__pin--1" data-name="Pin 1"><p>hi, it’s me</p><span class="img-anim__tail"></span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -74,6 +80,7 @@
   <div class="foot-meta"><span>© 2026 Gargi Gaikwad</span><span>Built with love</span></div>
 </footer>
 <script src="main.js"></script>
-<script type="module" src="gargi-photo-fan.js"></script>
+<script src="vendor/motion-js.min.js" defer></script>
+<script src="image-animation.js" defer></script>
 </body>
 </html>
