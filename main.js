@@ -51,7 +51,7 @@
       overlay.setAttribute("data-theme-target", targetTheme);
       overlay.style.setProperty("--theme-reveal-origin", origin);
       overlay.style.clipPath = "circle(0% at " + origin + ")";
-      overlay.innerHTML = '<div class="theme-transition-message" aria-hidden="true"><span class="theme-transition-spark">✦</span><span class="theme-transition-copy"></span><span class="theme-transition-caret"></span></div>';
+      overlay.innerHTML = '<div class="theme-transition-message" aria-hidden="true"><span class="theme-transition-copy"></span><span class="theme-transition-caret"></span></div>';
       document.body.appendChild(overlay);
 
       function finish() {

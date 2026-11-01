@@ -51,6 +51,7 @@ function mountPhotoFan(fan) {
   function reveal() {
     if (fan.classList.contains("is-visible")) return;
     fan.classList.add("is-visible");
+    fan.classList.remove("is-pending");
     if (reducedMotion) {
       fan.classList.add("is-settled");
       return;
@@ -121,6 +122,7 @@ function mountPhotoFan(fan) {
   if (reducedMotion) {
     fan.classList.add("is-visible", "is-settled");
   } else if ("IntersectionObserver" in window) {
+    fan.classList.add("is-pending");
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
         reveal();
