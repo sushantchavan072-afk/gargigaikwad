@@ -446,8 +446,27 @@ body.pg{height:100vh;height:100svh}
 @media(max-width:900px){#wgrid>.wcard{flex-basis:68%}}
 @media(max-width:660px){#wgrid{width:calc(100% - 32px);margin:28px auto 0;gap:14px;padding:44px 2px 18px}#wgrid>.wcard{flex-basis:86%}#wgrid:before{top:5px;right:2px}}
 
-/* Animated footer mascot. */
-.footer-cat{display:block;width:112px;height:112px;object-fit:contain;filter:drop-shadow(0 7px 12px rgba(0,0,0,.14))}
+/* Footer cat walks to a tiny bed when the footer enters view. */
+.footer-cat-journey{position:relative;width:100%;height:144px;margin:0 0 8px;overflow:hidden;isolation:isolate;--bed-width:150px;--cat-home-left:calc(100% - var(--bed-width) + 19px)}
+.footer-cat-bed{position:absolute;right:0;bottom:10px;width:var(--bed-width);height:64px;z-index:1;transform-origin:100% 100%}
+.footer-cat-bed__headboard{position:absolute;right:0;bottom:10px;width:22px;height:54px;border:3px solid #e7a34f;border-radius:13px 13px 6px 6px;background:#f3b65b}
+.footer-cat-bed__mattress{position:absolute;left:0;bottom:17px;width:calc(100% - 13px);height:25px;border-radius:14px 14px 6px 6px;background:#fff0d4}
+.footer-cat-bed__pillow{position:absolute;left:12px;bottom:30px;width:34px;height:14px;border-radius:8px;background:#fffaf1;box-shadow:0 2px 4px rgba(0,0,0,.12)}
+.footer-cat-bed__quilt{position:absolute;left:43px;right:15px;bottom:17px;height:22px;border-radius:12px 12px 5px 5px;background:#eaa0a8}
+.footer-cat-bed__frame{position:absolute;left:0;right:8px;bottom:7px;height:10px;border-radius:3px 3px 6px 6px;background:#a86b39}
+.footer-cat-bed__frame:before,.footer-cat-bed__frame:after{position:absolute;top:8px;width:7px;height:8px;border-radius:0 0 3px 3px;background:#a86b39;content:""}
+.footer-cat-bed__frame:before{left:7px}.footer-cat-bed__frame:after{right:6px}
+.footer-cat-walker,.footer-cat-sitter{position:absolute;display:block;object-fit:contain;filter:drop-shadow(0 7px 12px rgba(0,0,0,.14));pointer-events:none}
+.footer-cat-walker{left:0;bottom:11px;width:116px;height:82px;opacity:0;z-index:2}
+.footer-cat-sitter{left:var(--cat-home-left);bottom:10px;width:112px;height:112px;opacity:1;z-index:3}
+.footer-cat-journey.is-walking .footer-cat-walker{animation:footer-cat-walk 6.8s cubic-bezier(.45,0,.55,1) .35s both}
+.footer-cat-journey.is-walking .footer-cat-sitter{opacity:0;animation:footer-cat-sit 6.8s ease .35s both}
+.footer-cat-journey.is-walking .footer-cat-bed{animation:footer-cat-bed-bounce 6.8s ease .35s both}
+@keyframes footer-cat-walk{0%{left:0;opacity:1;transform:translateY(0)}5%{transform:translateY(-3px)}10%{transform:translateY(0)}70%{left:var(--cat-home-left);opacity:1;transform:translateY(-2px)}76%{left:var(--cat-home-left);opacity:1;transform:translateY(0)}84%{left:var(--cat-home-left);opacity:0;transform:translateY(0)}100%{left:var(--cat-home-left);opacity:0;transform:translateY(0)}}
+@keyframes footer-cat-sit{0%,74%{opacity:0;transform:translateY(8px) scale(.94)}82%{opacity:1;transform:translateY(-3px) scale(1.02)}90%,100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes footer-cat-bed-bounce{0%,74%,100%{transform:translateY(0) rotate(0)}80%{transform:translateY(-3px) rotate(-1deg)}86%{transform:translateY(0) rotate(0)}}
+@media(max-width:660px){.footer-cat-journey{height:124px;--bed-width:126px}.footer-cat-walker{width:94px;height:67px;bottom:10px}.footer-cat-sitter{width:88px;height:88px;bottom:10px}}
+@media(prefers-reduced-motion:reduce){.footer-cat-journey.is-walking .footer-cat-walker,.footer-cat-journey.is-walking .footer-cat-sitter,.footer-cat-journey.is-walking .footer-cat-bed{animation:none!important}.footer-cat-walker{display:none!important}.footer-cat-sitter{opacity:1!important;transform:none!important}}
 @media(max-width:660px){.hero h1{align-self:stretch;max-width:100%;padding-inline:12px;text-align:center}}
 
 /* Dark palette surfaces and controls. */
