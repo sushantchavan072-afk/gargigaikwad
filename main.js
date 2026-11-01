@@ -14,26 +14,10 @@
     var themeAnimating = false;
     var themeToast = null;
     var transitionWords = [
-      { text: "Blooming", motion: "blooming" },
-      { text: "Brewing", motion: "brewing" },
-      { text: "Sprouting", motion: "sprouting" },
-      { text: "Fluttering", motion: "fluttering" },
-      { text: "Dreaming", motion: "dreaming" },
-      { text: "Wandering", motion: "wandering" },
-      { text: "Twinkling", motion: "twinkling" },
-      { text: "Wiggling", motion: "wiggling" },
-      { text: "Bubbling", motion: "bubbling" },
-      { text: "Hatching", motion: "hatching" },
-      { text: "Sparkling", motion: "sparkling" },
-      { text: "Glimmering", motion: "glimmering" },
-      { text: "Floating", motion: "floating" },
-      { text: "Doodling", motion: "doodling" },
-      { text: "Snoozing", motion: "snoozing" },
-      { text: "Purring", motion: "purring" },
-      { text: "Popping", motion: "popping" },
-      { text: "Simmering", motion: "simmering" },
-      { text: "Daydreaming", motion: "daydreaming" },
-      { text: "Unfolding", motion: "unfolding" }
+      "Blooming", "Brewing", "Sprouting", "Fluttering", "Dreaming",
+      "Wandering", "Twinkling", "Wiggling", "Bubbling", "Hatching",
+      "Sparkling", "Glimmering", "Floating", "Doodling", "Snoozing",
+      "Purring", "Popping", "Simmering", "Daydreaming", "Unfolding"
     ];
     var transitionWordIndex = 0;
     function nextTransitionWord() {
@@ -84,7 +68,7 @@
       overlay.setAttribute("data-theme-target", targetTheme);
       overlay.style.setProperty("--theme-reveal-origin", origin);
       overlay.style.clipPath = "circle(0% at " + origin + ")";
-      overlay.innerHTML = '<div class="theme-transition-message" aria-hidden="true"><span class="theme-transition-copy"></span></div>';
+      overlay.innerHTML = '<div class="theme-transition-message" aria-hidden="true"><span class="theme-transition-copy"></span><span class="theme-transition-caret"></span></div>';
       document.body.appendChild(overlay);
 
       function finish() {
@@ -98,7 +82,6 @@
       if (typeof overlay.animate !== "function") { syncAndFinish(); return; }
 
       function closeOverlay() {
-        overlay.classList.remove("is-word-ready");
         overlay.classList.add("is-leaving");
         var close;
         try {
@@ -111,15 +94,23 @@
       }
       function showTransitionWord() {
         var copy = $(".theme-transition-copy", overlay);
-        var phrase = nextTransitionWord();
-        copy.textContent = phrase.text;
-        overlay.setAttribute("data-word-motion", phrase.motion);
-        overlay.classList.add("is-visible", "is-word-ready");
-        window.setTimeout(function () {
+        var message = nextTransitionWord();
+        var index = 0;
+        overlay.classList.add("is-typing");
+        function typeNext() {
           if (!overlay.isConnected) return;
-          syncTheme(nextTheme, true);
-          closeOverlay();
-        }, 940);
+          if (index >= message.length) {
+            window.setTimeout(function () {
+              if (!overlay.isConnected) return;
+              syncTheme(nextTheme, true);
+              closeOverlay();
+            }, 220);
+            return;
+          }
+          copy.textContent = message.slice(0, ++index);
+          window.setTimeout(typeNext, 42);
+        }
+        typeNext();
       }
 
       var open;

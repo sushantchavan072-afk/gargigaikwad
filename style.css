@@ -476,55 +476,16 @@ body.pg{height:100vh;height:100svh}
 .theme-transition-copy{white-space:normal;text-wrap:balance}
 .theme-transition[data-theme-target="dark"] .theme-transition-message{color:#fafafa}
 .theme-transition[data-theme-target="light"] .theme-transition-message{color:#18181b}
-.theme-transition.is-visible .theme-transition-message{opacity:1;transform:translate(-50%,-50%)}
+.theme-transition.is-typing .theme-transition-message{opacity:1;transform:translate(-50%,-50%)}
 .theme-transition.is-leaving .theme-transition-message{opacity:0;transform:translate(-50%,calc(-50% - 6px))}
-.theme-transition.is-word-ready .theme-transition-message{transform-origin:50% 50%;transition:none;will-change:opacity,translate,scale,rotate,filter,clip-path}
-.theme-transition.is-word-ready[data-word-motion="blooming"] .theme-transition-message{animation:word-bloom .82s cubic-bezier(.18,1.25,.35,1) both}
-.theme-transition.is-word-ready[data-word-motion="brewing"] .theme-transition-message{animation:word-brew .86s cubic-bezier(.2,.8,.25,1) both}
-.theme-transition.is-word-ready[data-word-motion="sprouting"] .theme-transition-message{transform-origin:50% 95%;animation:word-sprout .76s cubic-bezier(.2,1.35,.35,1) both}
-.theme-transition.is-word-ready[data-word-motion="fluttering"] .theme-transition-message{animation:word-flutter .88s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="dreaming"] .theme-transition-message{animation:word-dream .9s ease-out both}
-.theme-transition.is-word-ready[data-word-motion="wandering"] .theme-transition-message{animation:word-wander .9s cubic-bezier(.4,0,.2,1) both}
-.theme-transition.is-word-ready[data-word-motion="twinkling"] .theme-transition-message{animation:word-twinkle .8s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="wiggling"] .theme-transition-message{animation:word-wiggle .76s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="bubbling"] .theme-transition-message{animation:word-bubble .82s cubic-bezier(.2,1.25,.35,1) both}
-.theme-transition.is-word-ready[data-word-motion="hatching"] .theme-transition-message{transform-origin:50% 90%;animation:word-hatch .8s cubic-bezier(.2,.8,.25,1) both}
-.theme-transition.is-word-ready[data-word-motion="sparkling"] .theme-transition-message{animation:word-sparkle .84s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="glimmering"] .theme-transition-message{animation:word-glimmer .88s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="floating"] .theme-transition-message{animation:word-float .9s cubic-bezier(.2,.8,.25,1) both}
-.theme-transition.is-word-ready[data-word-motion="doodling"] .theme-transition-message{animation:word-doodle .86s ease-out both}
-.theme-transition.is-word-ready[data-word-motion="snoozing"] .theme-transition-message{animation:word-snooze .9s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="purring"] .theme-transition-message{animation:word-purr .9s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="popping"] .theme-transition-message{animation:word-pop .68s cubic-bezier(.2,1.45,.35,1) both}
-.theme-transition.is-word-ready[data-word-motion="simmering"] .theme-transition-message{animation:word-simmer .9s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="daydreaming"] .theme-transition-message{animation:word-daydream .9s ease-in-out both}
-.theme-transition.is-word-ready[data-word-motion="unfolding"] .theme-transition-message{transform-origin:50% 100%;animation:word-unfold .84s cubic-bezier(.2,.9,.25,1) both}
-@keyframes word-bloom{0%{opacity:0;scale:.72;rotate:-8deg;translate:0 12px;filter:blur(7px)}65%{opacity:1;scale:1.08;rotate:2deg;translate:0 -2px;filter:blur(0)}100%{opacity:1;scale:1;rotate:0deg;translate:0 0;filter:blur(0)}}
-@keyframes word-brew{0%{opacity:0;scale:.94;translate:0 14px;filter:blur(5px)}55%{opacity:1;scale:1.03;translate:0 -4px;filter:blur(0)}100%{opacity:1;scale:1;translate:0 0}}
-@keyframes word-sprout{0%{opacity:0;scale:.82 .18;translate:0 18px}68%{opacity:1;scale:1.05 1.08;translate:0 -2px}100%{opacity:1;scale:1 1;translate:0 0}}
-@keyframes word-flutter{0%{opacity:0;rotate:-9deg;translate:-12px 8px}30%{opacity:1;rotate:7deg;translate:8px -4px}58%{rotate:-5deg;translate:-5px 2px}78%{rotate:3deg;translate:3px -1px}100%{opacity:1;rotate:0deg;translate:0 0}}
-@keyframes word-dream{0%{opacity:0;scale:.96;translate:0 10px;filter:blur(8px)}48%{opacity:.9;scale:1.02;translate:0 -3px;filter:blur(1px)}100%{opacity:1;scale:1;translate:0 0;filter:blur(0)}}
-@keyframes word-wander{0%{opacity:0;translate:-46px 0;rotate:-4deg}48%{opacity:1;translate:18px -2px;rotate:2deg}76%{translate:-7px 1px;rotate:-1deg}100%{opacity:1;translate:0 0;rotate:0deg}}
-@keyframes word-twinkle{0%,100%{opacity:1;scale:1;text-shadow:0 0 0 transparent}20%{opacity:.25;scale:.96;text-shadow:0 0 18px currentColor}46%{opacity:1;scale:1.06;text-shadow:0 0 22px currentColor}68%{opacity:.62;scale:1;text-shadow:0 0 8px currentColor}84%{opacity:1;text-shadow:0 0 14px currentColor}}
-@keyframes word-wiggle{0%{rotate:0deg}14%{rotate:-7deg}30%{rotate:7deg}46%{rotate:-5deg}62%{rotate:4deg}78%{rotate:-2deg}100%{rotate:0deg}}
-@keyframes word-bubble{0%{opacity:0;scale:.7;translate:0 16px}56%{opacity:1;scale:1.1;translate:0 -5px}78%{scale:.97;translate:0 1px}100%{opacity:1;scale:1;translate:0 0}}
-@keyframes word-hatch{0%{opacity:0;scale:.92 .35;clip-path:inset(48% 0 48% 0)}55%{opacity:1;scale:1.04 1.08;clip-path:inset(0 0 0 0)}100%{opacity:1;scale:1 1;clip-path:inset(0 0 0 0)}}
-@keyframes word-sparkle{0%{opacity:.25;scale:.94;filter:brightness(.8);text-shadow:0 0 0 transparent}38%{opacity:1;scale:1.04;filter:brightness(1.45);text-shadow:0 0 20px currentColor}62%{filter:brightness(.92);text-shadow:0 0 4px currentColor}82%{filter:brightness(1.3);text-shadow:0 0 14px currentColor}100%{opacity:1;scale:1;filter:brightness(1);text-shadow:0 0 0 transparent}}
-@keyframes word-glimmer{0%{opacity:0;translate:-14px 0;filter:blur(3px) brightness(.8)}48%{opacity:1;translate:8px 0;filter:blur(0) brightness(1.3);text-shadow:0 0 16px currentColor}100%{opacity:1;translate:0 0;filter:blur(0) brightness(1);text-shadow:0 0 0 transparent}}
-@keyframes word-float{0%{opacity:0;translate:0 16px;scale:.97}48%{opacity:1;translate:0 -5px;scale:1.02}100%{opacity:1;translate:0 0;scale:1}}
-@keyframes word-doodle{0%{opacity:0;rotate:-3deg;clip-path:inset(0 100% 0 0)}70%{opacity:1;rotate:1deg;clip-path:inset(0 0 0 0)}100%{opacity:1;rotate:0deg;clip-path:inset(0 0 0 0)}}
-@keyframes word-snooze{0%{opacity:0;rotate:9deg;translate:0 10px;filter:blur(3px)}45%{opacity:1;rotate:-3deg;translate:0 -2px;filter:blur(0)}72%{rotate:2deg;translate:0 1px}100%{opacity:1;rotate:0deg;translate:0 0}}
-@keyframes word-purr{0%,100%{scale:1;text-shadow:0 0 0 transparent}28%{scale:1.025;text-shadow:0 0 12px currentColor}58%{scale:.99;text-shadow:0 0 5px currentColor}82%{scale:1.015;text-shadow:0 0 10px currentColor}}
-@keyframes word-pop{0%{opacity:0;scale:.35;rotate:-8deg}66%{opacity:1;scale:1.14;rotate:3deg}100%{opacity:1;scale:1;rotate:0deg}}
-@keyframes word-simmer{0%{opacity:0;translate:0 5px;rotate:-1deg;filter:blur(2px)}25%{opacity:1;translate:-2px -1px;rotate:1deg;filter:blur(0)}50%{translate:2px 1px;rotate:-.8deg}75%{translate:-1px -1px;rotate:.6deg}100%{opacity:1;translate:0 0;rotate:0deg}}
-@keyframes word-daydream{0%{opacity:0;translate:-18px 7px;scale:.98;filter:blur(5px)}36%{opacity:.8;translate:8px -5px;scale:1.015;filter:blur(1px)}68%{opacity:1;translate:-5px -2px;filter:blur(0)}100%{opacity:1;translate:0 0;scale:1}}
-@keyframes word-unfold{0%{opacity:0;scale:.92 .14;rotate:-4deg}62%{opacity:1;scale:1.03 1.04;rotate:0deg}100%{opacity:1;scale:1 1;rotate:0deg}}
+.theme-transition-caret{display:inline-block;width:2px;height:.76em;margin-left:.045em;background:currentColor;vertical-align:-.02em;animation:theme-caret .65s steps(2,start) infinite}
+@keyframes theme-caret{to{opacity:0}}
 .theme-mode-toast{position:fixed;z-index:10002;left:var(--theme-toast-left,50%);top:var(--theme-toast-top,80px);display:flex;align-items:center;gap:8px;min-height:34px;padding:7px 13px;border:1px solid rgba(24,24,27,.12);border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px -12px rgba(0,0,0,.3);color:#18181b;font:600 12px/1 var(--sans);white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,-7px) scale(.96);transition:opacity .2s ease,transform .28s var(--ease)}
 .theme-mode-toast[data-theme-target="dark"]{background:#252529;border-color:rgba(253,207,0,.34);color:#fafafa}
 .theme-mode-toast[data-theme-target="light"]{background:#fff;border-color:rgba(24,24,27,.12);color:#18181b}
 .theme-mode-toast.is-visible{opacity:1;transform:translate(-50%,0) scale(1)}
 .theme-mode-icon{color:#fdcf00;font-size:15px;line-height:1}
-@media(prefers-reduced-motion:reduce){.theme-transition-message,.theme-mode-toast{animation:none;transition:none}}
+@media(prefers-reduced-motion:reduce){.theme-transition-message,.theme-transition-caret,.theme-mode-toast{animation:none;transition:none}}
 
 /* ================================================================
    Image Animation — ported 1:1 from Xhulia's /about page (Framer component "Image Animation").
