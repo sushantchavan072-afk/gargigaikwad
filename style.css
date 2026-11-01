@@ -476,9 +476,9 @@ body.pg{height:100vh;height:100svh}
 .theme-transition-copy{white-space:normal;text-wrap:balance}
 .theme-transition[data-theme-target="dark"] .theme-transition-message{color:#fafafa}
 .theme-transition[data-theme-target="light"] .theme-transition-message{color:#18181b}
-.theme-transition.is-typing .theme-transition-message{opacity:1;transform:translate(-50%,-50%)}
+.theme-transition.is-visible .theme-transition-message{opacity:1;transform:translate(-50%,-50%)}
 .theme-transition.is-leaving .theme-transition-message{opacity:0;transform:translate(-50%,calc(-50% - 6px))}
-.theme-transition.is-word-ready .theme-transition-message{transform-origin:50% 50%;will-change:opacity,translate,scale,rotate,filter,clip-path}
+.theme-transition.is-word-ready .theme-transition-message{transform-origin:50% 50%;transition:none;will-change:opacity,translate,scale,rotate,filter,clip-path}
 .theme-transition.is-word-ready[data-word-motion="blooming"] .theme-transition-message{animation:word-bloom .82s cubic-bezier(.18,1.25,.35,1) both}
 .theme-transition.is-word-ready[data-word-motion="brewing"] .theme-transition-message{animation:word-brew .86s cubic-bezier(.2,.8,.25,1) both}
 .theme-transition.is-word-ready[data-word-motion="sprouting"] .theme-transition-message{transform-origin:50% 95%;animation:word-sprout .76s cubic-bezier(.2,1.35,.35,1) both}
@@ -519,14 +519,12 @@ body.pg{height:100vh;height:100svh}
 @keyframes word-simmer{0%{opacity:0;translate:0 5px;rotate:-1deg;filter:blur(2px)}25%{opacity:1;translate:-2px -1px;rotate:1deg;filter:blur(0)}50%{translate:2px 1px;rotate:-.8deg}75%{translate:-1px -1px;rotate:.6deg}100%{opacity:1;translate:0 0;rotate:0deg}}
 @keyframes word-daydream{0%{opacity:0;translate:-18px 7px;scale:.98;filter:blur(5px)}36%{opacity:.8;translate:8px -5px;scale:1.015;filter:blur(1px)}68%{opacity:1;translate:-5px -2px;filter:blur(0)}100%{opacity:1;translate:0 0;scale:1}}
 @keyframes word-unfold{0%{opacity:0;scale:.92 .14;rotate:-4deg}62%{opacity:1;scale:1.03 1.04;rotate:0deg}100%{opacity:1;scale:1 1;rotate:0deg}}
-.theme-transition-caret{display:inline-block;width:2px;height:.76em;margin-left:.045em;background:currentColor;vertical-align:-.02em;animation:theme-caret .65s steps(2,start) infinite}
-@keyframes theme-caret{to{opacity:0}}
 .theme-mode-toast{position:fixed;z-index:10002;left:var(--theme-toast-left,50%);top:var(--theme-toast-top,80px);display:flex;align-items:center;gap:8px;min-height:34px;padding:7px 13px;border:1px solid rgba(24,24,27,.12);border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px -12px rgba(0,0,0,.3);color:#18181b;font:600 12px/1 var(--sans);white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,-7px) scale(.96);transition:opacity .2s ease,transform .28s var(--ease)}
 .theme-mode-toast[data-theme-target="dark"]{background:#252529;border-color:rgba(253,207,0,.34);color:#fafafa}
 .theme-mode-toast[data-theme-target="light"]{background:#fff;border-color:rgba(24,24,27,.12);color:#18181b}
 .theme-mode-toast.is-visible{opacity:1;transform:translate(-50%,0) scale(1)}
 .theme-mode-icon{color:#fdcf00;font-size:15px;line-height:1}
-@media(prefers-reduced-motion:reduce){.theme-transition-message,.theme-transition-caret,.theme-mode-toast{animation:none;transition:none}}
+@media(prefers-reduced-motion:reduce){.theme-transition-message,.theme-mode-toast{animation:none;transition:none}}
 
 /* ================================================================
    Image Animation — ported 1:1 from Xhulia's /about page (Framer component "Image Animation").

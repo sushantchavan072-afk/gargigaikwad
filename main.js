@@ -84,7 +84,7 @@
       overlay.setAttribute("data-theme-target", targetTheme);
       overlay.style.setProperty("--theme-reveal-origin", origin);
       overlay.style.clipPath = "circle(0% at " + origin + ")";
-      overlay.innerHTML = '<div class="theme-transition-message" aria-hidden="true"><span class="theme-transition-copy"></span><span class="theme-transition-caret"></span></div>';
+      overlay.innerHTML = '<div class="theme-transition-message" aria-hidden="true"><span class="theme-transition-copy"></span></div>';
       document.body.appendChild(overlay);
 
       function finish() {
@@ -109,28 +109,17 @@
           close.finished.then(finish, finish);
         } catch (error) { finish(); }
       }
-      function typeTransitionNote() {
+      function showTransitionWord() {
         var copy = $(".theme-transition-copy", overlay);
         var phrase = nextTransitionWord();
-        var message = phrase.text;
+        copy.textContent = phrase.text;
         overlay.setAttribute("data-word-motion", phrase.motion);
-        var index = 0;
-        overlay.classList.add("is-typing");
-        function typeNext() {
+        overlay.classList.add("is-visible", "is-word-ready");
+        window.setTimeout(function () {
           if (!overlay.isConnected) return;
-          if (index >= message.length) {
-            overlay.classList.add("is-word-ready");
-            window.setTimeout(function () {
-              if (!overlay.isConnected) return;
-              syncTheme(nextTheme, true);
-              closeOverlay();
-            }, 940);
-            return;
-          }
-          copy.textContent = message.slice(0, ++index);
-          window.setTimeout(typeNext, 42);
-        }
-        typeNext();
+          syncTheme(nextTheme, true);
+          closeOverlay();
+        }, 940);
       }
 
       var open;
@@ -143,7 +132,7 @@
       } catch (error) { syncAndFinish(); return; }
 
       open.finished.then(function () {
-        window.setTimeout(typeTransitionNote, 180);
+        window.setTimeout(showTransitionWord, 180);
       }, syncAndFinish);
     }
     function syncTheme(theme, persist) {
