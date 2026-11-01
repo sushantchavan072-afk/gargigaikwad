@@ -12,31 +12,102 @@
   var themeToggle = $(".nav-logo");
   if (themeToggle) {
     var themeAnimating = false;
-    function playThemeBrush(nextTheme) {
-      if (reduce) { syncTheme(nextTheme, true); themeAnimating = false; return; }
-      var oldBrush = $(".theme-brush");
-      if (oldBrush) oldBrush.remove();
-      var brush = document.createElement("div");
-      brush.className = "theme-brush";
-      brush.setAttribute("aria-hidden", "true");
-      brush.style.setProperty("--brush-color", nextTheme === "dark" ? "#111113" : "#fafafa");
-      brush.style.setProperty("--brush-detail", nextTheme === "dark" ? "#34343a" : "#d8b300");
-      brush.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><filter id="oil-brush-edge" x="-12%" y="-12%" width="124%" height="124%"><feTurbulence type="fractalNoise" baseFrequency=".055" numOctaves="2" seed="7" result="paint-grain"/><feDisplacementMap in="SourceGraphic" in2="paint-grain" scale="1.2" xChannelSelector="R" yChannelSelector="G"/></filter></defs><path class="oil-stroke oil-base" d="M-22 -24 C7 -13 13 7 30 23 S67 76 122 124"/><path class="oil-stroke oil-bristle bristle-one" d="M-24 -28 C5 -14 12 7 28 21 S64 73 118 121"/><path class="oil-stroke oil-bristle bristle-two" d="M-20 -20 C10 -7 17 10 34 27 S71 80 125 116"/><path class="oil-stroke oil-bristle bristle-three" d="M-27 -18 C1 -6 9 12 25 29 S62 79 115 128"/><path class="oil-stroke oil-bristle bristle-four" d="M-17 -30 C15 -14 21 4 39 19 S75 71 120 114"/></svg>';
-      var strokeCount = brush.querySelectorAll(".oil-stroke").length, finishedStrokes = 0, revealed = false;
-      function revealTheme() {
-        if (revealed) return;
-        revealed = true;
-        syncTheme(nextTheme, true);
-        brush.classList.add("reveal");
-        window.setTimeout(function () { if (brush.isConnected) brush.remove(); themeAnimating = false; }, 520);
+    var themeToast = null;
+    function showThemeToast(theme) {
+      if (themeAnimating) return;
+      if (!themeToast) {
+        themeToast = document.createElement("div");
+        themeToast.className = "theme-mode-toast";
+        themeToast.id = "theme-mode-tooltip";
+        themeToast.setAttribute("role", "tooltip");
+        themeToast.innerHTML = '<span class="theme-mode-icon" aria-hidden="true"></span><span class="theme-mode-label"></span>';
+        document.body.appendChild(themeToast);
+        themeToggle.setAttribute("aria-describedby", themeToast.id);
       }
-      brush.addEventListener("animationend", function (event) {
-        if (event.animationName !== "oil-brush-draw" || !event.target.classList.contains("oil-stroke")) return;
-        finishedStrokes++;
-        if (finishedStrokes === strokeCount) revealTheme();
-      });
-      document.body.appendChild(brush);
-      window.setTimeout(revealTheme, 1050);
+      var rect = themeToggle.getBoundingClientRect();
+      var nextTheme = theme === "dark" ? "light" : "dark";
+      var dark = nextTheme === "dark";
+      themeToast.setAttribute("data-theme-target", nextTheme);
+      themeToast.setAttribute("aria-hidden", "false");
+      themeToast.style.setProperty("--theme-toast-left", Math.round(rect.left + rect.width / 2) + "px");
+      themeToast.style.setProperty("--theme-toast-top", Math.round(rect.bottom + 9) + "px");
+      $(".theme-mode-icon", themeToast).textContent = dark ? "☾" : "☼";
+      $(".theme-mode-label", themeToast).textContent = "Switch to " + (dark ? "dark" : "light") + " mode";
+      themeToast.classList.add("is-visible");
+    }
+    function hideThemeToast() {
+      if (!themeToast) return;
+      themeToast.classList.remove("is-visible");
+      themeToast.setAttribute("aria-hidden", "true");
+    }
+    function playThemeOverlay(nextTheme) {
+      if (reduce) { syncTheme(nextTheme, true); themeAnimating = false; return; }
+      var rect = themeToggle.getBoundingClientRect();
+      var origin = Math.round(rect.left + rect.width / 2) + "px " + Math.round(rect.top + rect.height / 2) + "px";
+      var overlay = document.createElement("div");
+      var targetTheme = nextTheme === "dark" ? "dark" : "light";
+      overlay.className = "theme-transition";
+      overlay.setAttribute("aria-hidden", "true");
+      overlay.setAttribute("data-theme-target", targetTheme);
+      overlay.style.setProperty("--theme-reveal-origin", origin);
+      overlay.style.clipPath = "circle(0% at " + origin + ")";
+      overlay.innerHTML = '<div class="theme-transition-message" aria-hidden="true"><span class="theme-transition-spark">✦</span><span class="theme-transition-copy"></span><span class="theme-transition-caret"></span></div>';
+      document.body.appendChild(overlay);
+
+      function finish() {
+        if (overlay.isConnected) overlay.remove();
+        themeAnimating = false;
+      }
+      function syncAndFinish() {
+        syncTheme(nextTheme, true);
+        finish();
+      }
+      if (typeof overlay.animate !== "function") { syncAndFinish(); return; }
+
+      function closeOverlay() {
+        overlay.classList.add("is-leaving");
+        var close;
+        try {
+          close = overlay.animate([
+            { clipPath: "circle(150% at " + origin + ")" },
+            { clipPath: "circle(0% at " + origin + ")" }
+          ], { duration: 620, easing: "cubic-bezier(.4,0,1,1)", fill: "forwards" });
+          close.finished.then(finish, finish);
+        } catch (error) { finish(); }
+      }
+      function typeTransitionNote() {
+        var copy = $(".theme-transition-copy", overlay);
+        var message = "Wait, we're triangulating...";
+        var index = 0;
+        overlay.classList.add("is-typing");
+        function typeNext() {
+          if (!overlay.isConnected) return;
+          if (index >= message.length) {
+            window.setTimeout(function () {
+              if (!overlay.isConnected) return;
+              syncTheme(nextTheme, true);
+              closeOverlay();
+            }, 220);
+            return;
+          }
+          copy.textContent = message.slice(0, ++index);
+          window.setTimeout(typeNext, 42);
+        }
+        typeNext();
+      }
+
+      var open;
+      try {
+        // Adapt the circle reveal from https://framer.com/m/MotionOverlayMenu-7kIMYf.js@uaIkpTNWCAP2y4LEnHY0.
+        open = overlay.animate([
+          { clipPath: "circle(0% at " + origin + ")" },
+          { clipPath: "circle(150% at " + origin + ")" }
+        ], { duration: 880, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" });
+      } catch (error) { syncAndFinish(); return; }
+
+      open.finished.then(function () {
+        window.setTimeout(typeTransitionNote, 180);
+      }, syncAndFinish);
     }
     function syncTheme(theme, persist) {
       if (theme === "dark") document.documentElement.dataset.theme = "dark";
@@ -47,15 +118,26 @@
       themeToggle.setAttribute("aria-pressed", dark ? "true" : "false");
       var themeColor = $("meta[name='theme-color']");
       if (themeColor) themeColor.setAttribute("content", dark ? "#111113" : "#fafafa");
-      if (persist) try { localStorage.setItem("gargi-theme", dark ? "dark" : "light"); } catch (e) {}
+      if (persist) {
+        try { localStorage.setItem("gargi-theme", dark ? "dark" : "light"); } catch (e) {}
+      }
     }
     syncTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false);
+    themeToggle.addEventListener("pointerenter", function (event) {
+      if (event.pointerType === "mouse") showThemeToast(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+    });
+    themeToggle.addEventListener("pointerleave", hideThemeToast);
+    themeToggle.addEventListener("focus", function () {
+      showThemeToast(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+    });
+    themeToggle.addEventListener("blur", hideThemeToast);
     themeToggle.addEventListener("click", function () {
       if (themeAnimating) return;
       var previousTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
       var nextTheme = previousTheme === "dark" ? "light" : "dark";
       themeAnimating = true;
-      playThemeBrush(nextTheme);
+      hideThemeToast();
+      playThemeOverlay(nextTheme);
     });
   }
 
@@ -200,124 +282,6 @@
   /* ---------- project gallery: hide until extra photos exist ---------- */
   var gallery = $("#gallery");
   if (gallery) setTimeout(function () { if (!$(".gal .frame", gallery)) gallery.style.display = "none"; }, 2500);
-
-  /* ============================================================
-     ABOUT: kinetic photo stack. Drag the top card (throw it left/right),
-     arrows, fan view, shuffle, tap a card to open it large.
-     ============================================================ */
-  (function kineticStack() {
-    var root = $("#kps"); if (!root) return;
-    var stage = $(".kps-stage", root), deck = $(".kps-deck", root), box = $(".kps-lightbox", root);
-    var cards = [], mode = "stack", busy = false, drag = null, moved = false, hint = $(".kps-hint", root);
-    var ROT = [12, 10, 6, 0, -5, -9, -12];
-
-    function layout() {
-      var n = cards.length, mid = (n - 1) / 2;
-      var m = /matrix\(([-\d.]+)/.exec(getComputedStyle(deck).transform), sc = m ? parseFloat(m[1]) || 1 : 1;
-      var maxSlot = Math.max(1, Math.ceil(n / 2));
-      var angle = 12 * Math.PI / 180;
-      var rotatedWidth = deck.offsetWidth * Math.cos(angle) + deck.offsetHeight * Math.sin(angle);
-      var avail = Math.max(0, stage.clientWidth / sc - rotatedWidth - 32);
-      var step = n > 1 ? clamp(avail / maxSlot, 0, 104) : 0;
-      cards.forEach(function (c, i) {
-        var slot = i === 0 ? 0 : Math.ceil(i / 2) * (i % 2 ? -1 : 1);
-        c.style.zIndex = n - i;
-        c.style.setProperty("--sx", (i * 5) + "px"); c.style.setProperty("--sy", (i * 5) + "px");
-        c.style.setProperty("--sr", (ROT[i % ROT.length]) + "deg");
-        c.style.setProperty("--fx", (slot * step).toFixed(1) + "px");
-        c.style.setProperty("--fy", (Math.abs(slot) * 18).toFixed(1) + "px");
-        c.style.setProperty("--fr", (slot * Math.min(5, 28 / Math.max(1, mid))).toFixed(2) + "deg");
-        c.tabIndex = i === 0 || mode === "fan" ? 0 : -1;
-        c.style.transform = "";
-      });
-    }
-    function setMode(m) {
-      mode = m; stage.classList.toggle("stack", m === "stack"); stage.classList.toggle("fan", m === "fan");
-      $$("[data-mode]", root).forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-mode") === m); });
-      if (hint) hint.textContent = m === "fan" ? "Tap a card to open it" : "Drag a card, tap to open";
-      layout();
-    }
-    function rotate() { cards.push(cards.shift()); }
-    function throwTop(dir, done) {
-      if (busy || mode === "fan" || !cards.length) return;
-      busy = true; var top = cards[0];
-      top.classList.remove("dragging"); top.style.transform = "";
-      top.classList.add("thrown-" + dir);
-      setTimeout(function () {
-        top.classList.remove("thrown-" + dir); rotate(); layout();
-        top.classList.add("arrive"); setTimeout(function () { top.classList.remove("arrive"); }, 420);
-        busy = false; if (done) done();
-      }, 340);
-    }
-    function shuffle() {
-      if (busy || cards.length < 2) return;
-      var btn = $(".kps-shuffle", root); btn.disabled = true;
-      var wait = mode === "fan" ? 430 : 0; setMode("stack");
-      setTimeout(function () { throwTop("right", function () { setTimeout(function () { throwTop("left", function () { btn.disabled = false; }); }, 100); }); }, wait);
-    }
-    function open(c) {
-      var img = $("img", box);
-      img.src = c.getAttribute("data-src"); img.alt = c.getAttribute("data-title");
-      $("figcaption b", box).textContent = c.getAttribute("data-title");
-      $("figcaption span", box).textContent = c.getAttribute("data-place");
-      $("figcaption em", box).textContent = c.getAttribute("data-year");
-      box.hidden = false; lockScroll(true); $(".kps-close", box).focus();
-    }
-    function close() { box.hidden = true; lockScroll(false); }
-
-    function down(e) {
-      var c = e.target.closest(".kps-card"); if (!c || mode !== "stack" || busy || c !== cards[0]) return;
-      if (e.pointerType === "mouse" && e.button !== 0) return;
-      c.setPointerCapture(e.pointerId); drag = { c: c, x: e.clientX, y: e.clientY, dx: 0, dy: 0 }; moved = false; c.classList.add("dragging");
-    }
-    function move(e) {
-      if (!drag) return;
-      drag.dx = e.clientX - drag.x; drag.dy = e.clientY - drag.y;
-      if (Math.abs(drag.dx) + Math.abs(drag.dy) > 7) moved = true;
-      drag.c.style.transform = "translate3d(" + drag.dx + "px," + drag.dy + "px,0) rotate(" + (drag.dx * 0.045) + "deg)";
-    }
-    function cancel() {
-      if (!drag) return; var d = drag; drag = null; d.c.classList.remove("dragging"); d.c.style.transform = "";
-    }
-    function up() {
-      if (!drag) return; var d = drag; drag = null; d.c.classList.remove("dragging");
-      if (Math.abs(d.dx) > 92) throwTop(d.dx > 0 ? "right" : "left");
-      else { d.c.style.transform = ""; if (!moved) open(d.c); }
-    }
-
-    function init() {
-      cards = $$(".kps-card", deck);
-      cards.slice(7).forEach(function (c) { c.remove(); });
-      cards = cards.slice(0, 7);
-      if (!cards.length) { root.style.display = "none"; return; }
-      deck.addEventListener("pointerdown", down); deck.addEventListener("pointermove", move);
-      deck.addEventListener("pointerup", up); deck.addEventListener("pointercancel", cancel);
-      deck.addEventListener("click", function (e) { var c = e.target.closest(".kps-card"); if (c && mode === "fan") open(c); });
-      deck.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowRight") { e.preventDefault(); throwTop("right"); }
-        else if (e.key === "ArrowLeft") { e.preventDefault(); throwTop("left"); }
-        else if ((e.key === "Enter" || e.key === " ") && mode === "stack" && e.target === cards[0]) { e.preventDefault(); open(cards[0]); }
-      });
-      $$("[data-mode]", root).forEach(function (b) { b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); }); });
-      $$("[data-dir]", root).forEach(function (b) { b.addEventListener("click", function () { throwTop(b.getAttribute("data-dir")); }); });
-      $(".kps-shuffle", root).addEventListener("click", shuffle);
-      $(".kps-close", box).addEventListener("click", close);
-      box.addEventListener("click", function (e) { if (e.target === box) close(); });
-      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !box.hidden) close(); });
-      window.addEventListener("resize", layout);
-      document.body.appendChild(box);                  /* lightbox lives on <body> so nothing can clip it */
-      layout();
-      /* Open the closed stack into a balanced fan once the images are ready. */
-      if (reduce) { setMode("fan"); return; }
-      setTimeout(function () {
-        cards.forEach(function (c, i) { c.style.setProperty("--td", (i * 55) + "ms"); });
-        setMode("fan");
-        setTimeout(function () { cards.forEach(function (c) { c.style.removeProperty("--td"); }); }, 1100);
-      }, 650);
-    }
-    // wait until every image has loaded or failed (failed optional cards remove themselves), then start
-    if (document.readyState === "complete") init(); else window.addEventListener("load", init);
-  })();
 
   /* ---------- Esc = back on detail pages ---------- */
   var backLink = $(".back");
