@@ -8,17 +8,6 @@
   var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  var footerCatJourney = $("[data-footer-cat]");
-  if (footerCatJourney && !reduce && "IntersectionObserver" in window) {
-    var footerCatObserver = new IntersectionObserver(function (entries) {
-      if (entries.some(function (entry) { return entry.isIntersecting; })) {
-        footerCatJourney.classList.add("is-walking");
-        footerCatObserver.disconnect();
-      }
-    }, { threshold: 0.25 });
-    footerCatObserver.observe(footerCatJourney);
-  }
-
   /* ---------- persistent light/dark theme, toggled from the navbar smiley ---------- */
   var themeToggle = $(".nav-logo");
   if (themeToggle) {
