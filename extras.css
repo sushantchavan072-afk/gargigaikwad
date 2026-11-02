@@ -1,0 +1,87 @@
+/* extras.css — add-on features (v12+). Loaded after style.css on every page. See PREP-AND-CHANGELOG.md.
+   A1 cursor · A2 page wipe · A3 smiley/rain · A4 now card · A5 language · A6 headline · A7 side index
+   (B/C stage blocks are appended below as they are built) */
+
+/* ---------- Devanagari fonts (only downloaded when Marathi text is on screen: unicode-range) ---------- */
+@font-face{font-family:"GG Devanagari Sans";src:url(fonts/noto-sans-devanagari.woff2) format("woff2");font-weight:100 900;font-display:swap;unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF}
+@font-face{font-family:"GG Devanagari Serif";src:url(fonts/tiro-marathi.woff2) format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF}
+@font-face{font-family:"GG Devanagari Serif";src:url(fonts/tiro-marathi-italic.woff2) format("woff2");font-weight:400;font-style:italic;font-display:swap;unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20B9,U+25CC,U+A830-A839,U+A8E0-A8FF}
+:root[lang="mr"]{--sans:"Geist","GG Devanagari Sans",ui-sans-serif,system-ui,sans-serif;--display:"PP Editorial New","GG Devanagari Serif","Newsreader",Georgia,serif}
+:root[lang="mr"] .display{font-weight:400;font-variation-settings:normal}
+:root[lang="mr"] .nav-pill a{font-size:17px}
+
+/* ---------- A2: paper-wipe page transition (html::before = yellow sheet, html::after = page-colour sheet) ---------- */
+html::before,html::after{content:"";position:fixed;inset:0;pointer-events:none;transform:translateY(100%);will-change:transform}
+html::before{background:var(--yellow);z-index:9998}
+html::after{background:var(--bg);z-index:9999}
+html.wipe-go::before{transform:translateY(0);transition:transform .48s var(--ease)}
+html.wipe-go::after{transform:translateY(0);transition:transform .48s var(--ease) .1s}
+html.wipe-in::before,html.wipe-in::after{transform:translateY(0);animation:ggWipeAway .01s 2.4s forwards}  /* fail-safe if JS never runs */
+html.wipe-in.wipe-reveal::before{transform:translateY(-100%);transition:transform .6s var(--ease) .1s}
+html.wipe-in.wipe-reveal::after{transform:translateY(-100%);transition:transform .6s var(--ease)}
+@keyframes ggWipeAway{to{transform:translateY(-100%);visibility:hidden}}
+@media (prefers-reduced-motion:reduce){html::before,html::after{display:none}}
+
+/* ---------- A1: smart cursor ---------- */
+.gg-cursor{position:fixed;left:0;top:0;z-index:9990;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:1.5px solid var(--zinc-500);pointer-events:none;opacity:0;display:grid;place-items:center;
+  transition:width .3s var(--ease),height .3s var(--ease),margin .3s var(--ease),background .25s,border-color .25s,opacity .25s;will-change:transform}
+.gg-cursor.is-on{opacity:.9}
+.gg-cursor.is-down{width:22px;height:22px;margin:-11px 0 0 -11px}
+.gg-cursor.has-label{width:76px;height:76px;margin:-38px 0 0 -38px;background:var(--yellow);border-color:var(--yellow);opacity:1}
+.gg-cursor-label{font:600 13px/1 var(--mono);letter-spacing:.02em;color:#18181b;white-space:nowrap;opacity:0;transform:scale(.6);transition:opacity .2s,transform .3s var(--ease)}
+.gg-cursor.has-label .gg-cursor-label{opacity:1;transform:none}
+.gg-cursor.is-ring{width:50px;height:50px;margin:-25px 0 0 -25px;border:2px solid var(--yellow);opacity:1}
+@media (hover:none),(pointer:coarse){.gg-cursor{display:none}}
+
+/* click-to-enlarge (gallery + hero images) */
+.gg-lightbox{position:fixed;inset:0;z-index:9500;display:grid;place-items:center;padding:4vmin;background:rgba(9,9,11,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s}
+.gg-lightbox.is-open{opacity:1;pointer-events:auto}
+.gg-lightbox img{max-width:100%;max-height:100%;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.5);transform:scale(.94);transition:transform .45s var(--ease)}
+.gg-lightbox.is-open img{transform:none}
+.gg-lightbox button{position:absolute;top:18px;right:18px;width:46px;height:46px;border-radius:23px;border:0;background:var(--yellow);color:#18181b;font-size:22px;line-height:1}
+.cs-hero img,.gal img{cursor:zoom-in}
+
+/* ---------- A3: smiley eyes + letter rain ---------- */
+.nav-logo .s-eye{translate:var(--eye-x,0px) var(--eye-y,0px);transition:translate .12s linear}
+.nav-logo.is-wink .s-eye:last-of-type{animation:ggWink .5s ease}
+@keyframes ggWink{0%,100%{transform:scaleY(1)}35%,65%{transform:scaleY(.12)}}
+.gg-rain{position:fixed;top:-12vh;z-index:9400;pointer-events:none;font-family:var(--display);font-style:italic;color:var(--zinc-950);line-height:1;will-change:transform,opacity;animation:ggFall var(--t,3s) cubic-bezier(.4,.1,.6,1) var(--d,0s) forwards}
+.gg-rain.is-y{color:var(--yellow);-webkit-text-stroke:1px rgba(0,0,0,.25)}
+@keyframes ggFall{to{transform:translate3d(var(--dx,0),118vh,0) rotate(var(--r,200deg));opacity:.9}}
+.gg-toast{position:fixed;left:50%;bottom:28px;z-index:9400;transform:translate(-50%,20px);padding:10px 18px;border-radius:999px;background:var(--zinc-950);color:var(--bg);font:500 14px/1.2 var(--sans);opacity:0;pointer-events:none;transition:opacity .3s,transform .4s var(--ease)}
+.gg-toast.is-on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- A4: "Right now" card ---------- */
+.now-card{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:28px 0 8px;padding:16px 18px;border-radius:20px;background:var(--zinc-100);border:1px solid var(--zinc-200)}
+.now-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.55);animation:ggPulse 2.2s infinite;flex:none}
+.now-card[data-awake="no"] .now-dot{background:var(--zinc-400);animation:none}
+@keyframes ggPulse{70%{box-shadow:0 0 0 9px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.now-label{font:600 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.04em;color:var(--zinc-500)}
+.now-time{font:500 22px/1 var(--display);color:var(--zinc-950);letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.now-state{font-size:14px;color:var(--zinc-600);flex:1 1 200px}
+@media (prefers-reduced-motion:reduce){.now-dot{animation:none}}
+
+/* ---------- A5: language toggle (round button between nav pill and mail) ---------- */
+.nav-lang{width:56px;height:56px;border-radius:28px;display:grid;place-items:center;padding:0;font:600 17px/1 var(--sans);color:var(--zinc-800);transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.nav-lang:hover{transform:scale(1.07) rotate(4deg)}
+.nav-lang:focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
+@media(max-width:660px){.nav-lang{width:46px;height:46px;border-radius:23px;font-size:16px}.nav{gap:6px}}
+
+/* ---------- A6: reactive headline ---------- */
+.gg-w{display:inline-block;white-space:nowrap}
+.gg-l{display:inline-block;white-space:pre;transform:translateY(calc(var(--p,0) * -9px));transition:transform .18s ease-out}
+.gg-l.is-flip{font-style:italic}
+em .gg-l.is-flip{font-style:normal}
+
+/* ---------- A7: case-study side index ---------- */
+.cs-index{position:fixed;left:22px;top:50%;z-index:60;transform:translateY(-50%);display:none;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity .4s}
+.cs-index.is-on{opacity:1;pointer-events:auto}
+@media(min-width:1280px){.cs-index{display:flex}}
+.cs-index a{display:flex;align-items:center;gap:10px;height:26px;color:var(--zinc-400);font:600 11px/1 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.cs-index a::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;transition:transform .3s var(--ease),background .2s}
+.cs-index a span{opacity:0;transform:translateX(-6px);transition:opacity .25s,transform .3s var(--ease);white-space:nowrap}
+.cs-index:hover a span,.cs-index a.is-active span,.cs-index a:focus-visible span{opacity:1;transform:none}
+.cs-index a.is-active{color:var(--zinc-950)}
+.cs-index a.is-active::before{background:var(--yellow);transform:scale(1.5);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.cs-index a:hover{color:var(--zinc-800)}
+.has-cs-index :is(.cs-hero,.intro,.trio,#gallery,.panels,.next-case){scroll-margin-top:96px}

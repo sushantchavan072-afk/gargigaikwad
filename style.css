@@ -487,29 +487,45 @@ body.pg{height:100vh;height:100svh}
 .theme-mode-icon{color:#fdcf00;font-size:15px;line-height:1}
 @media(prefers-reduced-motion:reduce){.theme-transition-message,.theme-transition-caret,.theme-mode-toast{animation:none;transition:none}}
 
-/* Xhulia's seven-photo fan motion, using Gargi's portrait */
-.gargi-photo-fan{position:relative;width:min(1200px,calc(100vw - 48px));height:300px;margin:68px auto 124px;overflow:visible;--fan-step:clamp(0px,calc(16.6667vw - 44.667px),150px)}
-.gargi-photo-fan__stage{position:relative;width:100%;height:300px;isolation:isolate;overflow:visible;cursor:pointer;touch-action:manipulation;outline:none}
-.gargi-photo-fan__stage:focus-visible{outline:2px solid var(--yellow);outline-offset:10px;border-radius:18px}
-.gargi-photo-fan__stack{position:absolute;inset:0;overflow:visible;transform:rotate(0deg) scale(1);transform-origin:50% 50%;opacity:1;will-change:transform,opacity;transition:transform 2.4s cubic-bezier(.44,0,.56,1),opacity .4s ease}
-.gargi-photo-fan.is-pending:not(.is-visible) .gargi-photo-fan__stack{transform:rotate(-40deg) scale(1.2);opacity:0}
-.gargi-photo-fan.is-visible .gargi-photo-fan__stack{transform:rotate(-14deg) scale(1.2);opacity:1}
-.gargi-photo-fan.is-settled .gargi-photo-fan__stack{transform:rotate(0deg) scale(1);transition:transform 1s cubic-bezier(.2,1.25,.4,1),opacity .2s ease}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__stack{transform:rotate(0deg) scale(1)}
-.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__stack{transform:rotate(0deg) scale(1);opacity:1}
-.gargi-photo-fan__card{position:absolute;top:calc(50% - 140px);left:calc(50% - 110px);width:220px;height:280px;margin:0;overflow:hidden;border-radius:18px;background:#e8e5df;transform:translateX(var(--fan-x)) rotate(var(--fan-rotation));transform-origin:50% 50%;transition:transform 1s cubic-bezier(.2,1.25,.4,1);will-change:transform;box-shadow:0 14px 36px rgba(20,20,20,.13)}
-.gargi-photo-fan__card img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover;transition:opacity .2s ease;pointer-events:none}
-.gargi-photo-fan__card:nth-child(1){--fan-x:calc(0px - var(--fan-step) - var(--fan-step) - var(--fan-step));--fan-rotation:-12deg}
-.gargi-photo-fan__card:nth-child(2){--fan-x:calc(0px - var(--fan-step) - var(--fan-step));--fan-rotation:-9deg}
-.gargi-photo-fan__card:nth-child(3){--fan-x:calc(0px - var(--fan-step));--fan-rotation:-5deg}
-.gargi-photo-fan__card:nth-child(4){--fan-x:0px;--fan-rotation:0deg}
-.gargi-photo-fan__card:nth-child(5){--fan-x:var(--fan-step);--fan-rotation:6deg}
-.gargi-photo-fan__card:nth-child(6){--fan-x:calc(var(--fan-step) + var(--fan-step));--fan-rotation:10deg}
-.gargi-photo-fan__card:nth-child(7){--fan-x:calc(var(--fan-step) + var(--fan-step) + var(--fan-step));--fan-rotation:12deg}
-.gargi-photo-fan.is-pending:not(.is-visible) .gargi-photo-fan__card{transform:translateX(0) rotate(0deg)}
-.gargi-photo-fan.is-expanded .gargi-photo-fan__card,.gargi-photo-fan__stage:is(:hover,:focus-visible) .gargi-photo-fan__card{transform:translateX(var(--fan-x)) translateY(-5px) rotate(var(--fan-rotation)) scale(1.02)}
-.gargi-photo-fan__stage .gargi-photo-fan__card:hover{z-index:2;transform:translateX(var(--fan-x)) translateY(-16px) rotate(var(--fan-rotation)) scale(1.04)}
-@media(max-width:660px){.gargi-photo-fan,.gargi-photo-fan__stage{height:210px}.gargi-photo-fan{--fan-step:clamp(0px,calc(16.6667vw - 33px),80px)}.gargi-photo-fan__card{top:calc(50% - 95px);left:calc(50% - 75px);width:150px;height:190px}}
-@media(max-width:450px){.gargi-photo-fan{--fan-step:clamp(0px,calc(16.6667vw - 26.667px),60px)}.gargi-photo-fan__card{top:calc(50% - 71px);left:calc(50% - 56px);width:112px;height:142px}}
-@media(max-width:340px){.gargi-photo-fan{--fan-step:clamp(0px,calc(16.6667vw - 21.333px),42px)}.gargi-photo-fan__card{top:calc(50% - 50px);left:calc(50% - 40px);width:80px;height:100px}}
-@media(prefers-reduced-motion:reduce){.gargi-photo-fan__stack,.gargi-photo-fan__card{transition:none!important}}
+/* ================================================================
+   Image Animation — ported 1:1 from Xhulia's /about page (Framer component "Image Animation").
+   Variants (data-variant): out -> in -> scale-down -> expand, driven by image-animation.js.
+   No data-variant / no JS = the finished "expand" layout, so the page still looks right.
+   Numbers below are the component's own: 184x230 cards, 18px radius, per-card offset + tilt.
+   Responsive scale (Xhulia): x1 >=1440px, x0.8 at 810-1439px, x0.5 below 810px.
+   ================================================================ */
+.img-anim-row{display:flex;flex-flow:row;place-content:center;align-items:center;width:calc(100% + 48px);margin:80px -24px;padding:48px 0;position:relative;overflow-x:clip;text-align:left}
+.img-anim-scale{flex:1 0 0;width:1px;position:relative}
+@media(min-width:810px) and (max-width:1439.98px){.img-anim-scale{transform:scale(.8)}}
+@media(max-width:809.98px){.img-anim-scale{transform:scale(.5)}}
+.img-anim{display:flex;flex-flow:column;place-content:center;align-items:center;gap:10px;width:100%;height:184px;padding:0;position:relative;overflow:visible}
+.img-anim__stack{flex:none;position:relative;width:184px;height:184px;z-index:1;overflow:visible}
+.js .img-anim:not([data-variant]) .img-anim__stack,.img-anim[data-variant=out] .img-anim__stack{visibility:hidden}
+.img-anim__card{position:absolute;flex:none;width:184px;height:230px;margin:0;border-radius:18px;overflow:hidden;transform:rotate(var(--r,0deg));-webkit-user-select:none;user-select:none}
+.img-anim__card--pin{overflow:visible}
+.img-anim__card img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover;object-position:center;pointer-events:none;-webkit-user-drag:none}
+/* expand layout (default) — left/top/rotation per card */
+.img-anim__card[data-name="Image 7"]{left:-407px;top:36px;--r:-12deg}
+.img-anim__card[data-name="Image 6"]{left:-307px;top:31px;--r:-9deg}
+.img-anim__card[data-name="Image 5"]{left:-161px;top:-15px;--r:-5deg}
+.img-anim__card[data-name="Image 4"]{left:0;top:-3px}
+.img-anim__card[data-name="Image 4"] img{object-position:0% center}
+.img-anim__card[data-name="Image 3"]{left:150px;top:-15px;--r:6deg}
+.img-anim__card[data-name="Image 2"]{left:262px;top:31px;--r:10deg}
+.img-anim__card[data-name="Image 1"]{left:396px;top:36px;--r:12deg}
+/* stacked layout (out / in / scale-down) — every card centred on the stack */
+.img-anim:is([data-variant=out],[data-variant=in],[data-variant=scale-down]) .img-anim__card{left:0;top:-23px;--r:0deg}
+/* pins (tags) */
+.img-anim__pin{position:absolute;display:flex;flex-flow:row;place-content:center;align-items:center;gap:10px;width:min-content;height:min-content;padding:6px 10px;border-radius:15px;overflow:visible}
+.img-anim__pin p{position:relative;flex:none;width:auto;height:auto;margin:0;white-space:pre;font-family:var(--sans);font-size:14px;font-weight:400;line-height:18.2px;letter-spacing:normal}
+.img-anim__tail{position:absolute;width:10px;height:10px;overflow:hidden;z-index:1;background:inherit;transform:rotate(-45deg)}
+.img-anim__pin--2{right:58px;top:-55px;background:var(--yellow)}
+.img-anim__pin--2 p{color:#27272a}
+.img-anim__pin--2 .img-anim__tail{bottom:-5px;left:calc(50% - 5px)}
+.img-anim__pin--1{right:52px;top:-55px;background:var(--zinc-100)}
+.img-anim__pin--1 p{color:var(--zinc-500)}
+.img-anim__pin--1 .img-anim__tail{bottom:-3px;left:calc(50% - 5px)}
+.img-anim:is([data-variant=out],[data-variant=in],[data-variant=scale-down]) .img-anim__pin--2{right:82px;top:-65px}
+.img-anim:is([data-variant=out],[data-variant=in],[data-variant=scale-down]) .img-anim__pin--2 .img-anim__tail{left:auto;right:25px}
+.img-anim:is([data-variant=out],[data-variant=in],[data-variant=scale-down]) .img-anim__pin--1{right:30px;top:-65px}
+.img-anim:is([data-variant=out],[data-variant=in],[data-variant=scale-down]) .img-anim__pin--1 .img-anim__tail{bottom:-5px;left:23px}
