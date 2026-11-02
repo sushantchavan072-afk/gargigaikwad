@@ -446,7 +446,7 @@ body.pg{height:100vh;height:100svh}
 @media(max-width:900px){#wgrid>.wcard{flex-basis:68%}}
 @media(max-width:660px){#wgrid{width:calc(100% - 32px);margin:28px auto 0;gap:14px;padding:44px 2px 18px}#wgrid>.wcard{flex-basis:86%}#wgrid:before{top:5px;right:2px}}
 
-/* Animated footer mascot. */
+/* Footer cat: peeking pose, soft blinks and a tiny wave. */
 .footer-cat{display:block;width:112px;height:112px;object-fit:contain;filter:drop-shadow(0 7px 12px rgba(0,0,0,.14))}
 @media(max-width:660px){.hero h1{align-self:stretch;max-width:100%;padding-inline:12px;text-align:center}}
 

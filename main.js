@@ -13,6 +13,23 @@
   if (themeToggle) {
     var themeAnimating = false;
     var themeToast = null;
+    var transitionWords = [
+      "Blooming", "Brewing", "Sprouting", "Fluttering", "Dreaming",
+      "Wandering", "Twinkling", "Wiggling", "Bubbling", "Hatching",
+      "Sparkling", "Glimmering", "Floating", "Doodling", "Snoozing",
+      "Purring", "Popping", "Simmering", "Daydreaming", "Unfolding"
+    ];
+    var transitionWordIndex = 0;
+    function nextTransitionWord() {
+      var index = transitionWordIndex;
+      try {
+        var savedIndex = parseInt(localStorage.getItem("gargi-theme-transition-word-index") || "0", 10);
+        if (isFinite(savedIndex) && savedIndex >= 0) index = savedIndex % transitionWords.length;
+        localStorage.setItem("gargi-theme-transition-word-index", String((index + 1) % transitionWords.length));
+      } catch (error) {}
+      transitionWordIndex = (index + 1) % transitionWords.length;
+      return transitionWords[index];
+    }
     function showThemeToast(theme) {
       if (themeAnimating) return;
       if (!themeToast) {
@@ -75,9 +92,9 @@
           close.finished.then(finish, finish);
         } catch (error) { finish(); }
       }
-      function typeTransitionNote() {
+      function showTransitionWord() {
         var copy = $(".theme-transition-copy", overlay);
-        var message = "Wait, we're triangulating...";
+        var message = nextTransitionWord();
         var index = 0;
         overlay.classList.add("is-typing");
         function typeNext() {
@@ -106,7 +123,7 @@
       } catch (error) { syncAndFinish(); return; }
 
       open.finished.then(function () {
-        window.setTimeout(typeTransitionNote, 180);
+        window.setTimeout(showTransitionWord, 180);
       }, syncAndFinish);
     }
     function syncTheme(theme, persist) {
