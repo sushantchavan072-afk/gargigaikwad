@@ -46,7 +46,23 @@
       <div class="label">Tools</div><div class="chips"><span class="chip">Details to be added</span></div>
     </aside>
   </section>
+  <section class="lab" id="lab" data-lab hidden aria-label="Taks type lab">
+    <div class="lab-head"><span class="eyebrow">Type lab</span><h2 class="display">Try <em>Taks</em></h2></div>
+    <div class="lab-card">
+      <div class="lab-out" contenteditable="true" spellcheck="false" role="textbox" aria-multiline="true" aria-label="Type here to preview Taks" data-placeholder="Type here…"></div>
+      <div class="lab-ctl">
+        <label>Size <input class="lab-size" type="range" min="24" max="220" value="110"><output class="lab-size-val">110px</output></label>
+        <label>Spacing <input class="lab-track" type="range" min="-0.05" max="0.4" step="0.01" value="0"></label>
+        <div class="lab-chips" aria-label="Sample text"></div>
+      </div>
+    </div>
+    <div class="lab-glyphs"><div><div class="lab-tabs" role="tablist" aria-label="Glyph sets"></div><div class="lab-grid"></div></div><div class="lab-detail" aria-live="polite"></div></div>
+  </section>
   <section class="trio n3" data-reveal><div><h2 class="display">Brief</h2><p>Design a typeface with a clear voice and build a full specimen around it.</p></div><div><h2 class="display">Process</h2><p>Pencil sketches, digitised outlines, spacing tests and iterative proofing at multiple sizes.</p></div><div><h2 class="display">Outcome</h2><p>A working font and a specimen showing the letterforms in use. See the full project on Behance.</p></div></section>
+  <section class="cmp-section" data-optional aria-label="Sketch to specimen">
+    <div class="lab-head"><span class="eyebrow">Sketch to specimen</span></div>
+    <div data-compare data-before="assets/taks-sketch.jpg" data-after="assets/bh-taks.jpg" data-before-label="Pencil sketch" data-after-label="Final specimen"></div>
+  </section>
   <div id="gallery"><div class="tabs"><div class="tabs-in"><span class="tab-on">Gallery</span></div></div>
   <section class="gal"><div class="frame" data-optional><img src="assets/taks-latest.webp" alt="Taks: Type Design" loading="lazy" decoding="async" class="" onerror="this.closest('[data-optional]')?.remove()||this.remove()"></div></section></div>
   <div class="next-case"><a href="noto-sans.html"><div><small>Next project</small><strong>Noto Sans: A Typeface for the World</strong></div><span class="circ"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></a></div>
@@ -67,5 +83,7 @@
 <script src="main.js"></script>
 <script src="extras-i18n.js" defer></script>
 <script src="extras.js" defer></script>
+<script src="taks-lab.js" defer></script>
+<script src="compare.js" defer></script>
 </body>
 </html>
