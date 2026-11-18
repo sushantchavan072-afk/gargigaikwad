@@ -1,0 +1,191 @@
+[
+  {
+    "src": "assets/shoot-diary/photo-01.webp",
+    "thumbnail": "assets/shoot-diary/thumb-01.webp",
+    "chapter": "On set",
+    "title": "Setting the scene",
+    "alt": "A wide view of the garden set, performers, props and camera crew",
+    "width": 2000,
+    "height": 1500
+  },
+  {
+    "src": "assets/shoot-diary/photo-02.webp",
+    "thumbnail": "assets/shoot-diary/thumb-02.webp",
+    "chapter": "On set",
+    "title": "The wider frame",
+    "alt": "Performers seated around a styled table while the camera crew prepares nearby",
+    "width": 2000,
+    "height": 1500
+  },
+  {
+    "src": "assets/shoot-diary/photo-03.webp",
+    "thumbnail": "assets/shoot-diary/thumb-03.webp",
+    "chapter": "On set",
+    "title": "Staging a shot",
+    "alt": "The crew gathers around a performer seated above the garden set",
+    "width": 2000,
+    "height": 1500
+  },
+  {
+    "src": "assets/shoot-diary/photo-04.webp",
+    "thumbnail": "assets/shoot-diary/thumb-04.webp",
+    "chapter": "On set",
+    "title": "Behind the setup",
+    "alt": "A wide view of the filming setup and crew on location",
+    "width": 2000,
+    "height": 1500
+  },
+  {
+    "src": "assets/shoot-diary/photo-05.webp",
+    "thumbnail": "assets/shoot-diary/thumb-05.webp",
+    "chapter": "On set",
+    "title": "Room for the scene",
+    "alt": "The outdoor set beneath a broad blue sky",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-06.webp",
+    "thumbnail": "assets/shoot-diary/thumb-06.webp",
+    "chapter": "On set",
+    "title": "A view from the sidelines",
+    "alt": "The crew and performers arranged across the garden location",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-07.webp",
+    "thumbnail": "assets/shoot-diary/thumb-07.webp",
+    "chapter": "On set",
+    "title": "Finding a viewpoint",
+    "alt": "A performer seated on the swing frame above the garden",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-08.webp",
+    "thumbnail": "assets/shoot-diary/thumb-08.webp",
+    "chapter": "On set",
+    "title": "Preparing the setup",
+    "alt": "Crew members around a ladder with a performer above them",
+    "width": 1125,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-09.webp",
+    "thumbnail": "assets/shoot-diary/thumb-09.webp",
+    "chapter": "On set",
+    "title": "Another angle",
+    "alt": "A second view of the ladder setup and surrounding crew",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-10.webp",
+    "thumbnail": "assets/shoot-diary/thumb-10.webp",
+    "chapter": "On set",
+    "title": "Working together",
+    "alt": "Crew members helping prepare a shot around the ladder",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-11.webp",
+    "thumbnail": "assets/shoot-diary/thumb-11.webp",
+    "chapter": "On set",
+    "title": "Before the take",
+    "alt": "Another moment of preparation at the ladder setup",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-12.webp",
+    "thumbnail": "assets/shoot-diary/thumb-12.webp",
+    "chapter": "At the camera",
+    "title": "Checking the frame",
+    "alt": "A camera operator in a red shirt adjusting a DSLR on a tripod",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-13.webp",
+    "thumbnail": "assets/shoot-diary/thumb-13.webp",
+    "chapter": "At the camera",
+    "title": "A small adjustment",
+    "alt": "Two crew members checking the camera setup together",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-14.webp",
+    "thumbnail": "assets/shoot-diary/thumb-14.webp",
+    "chapter": "At the camera",
+    "title": "Through the monitor",
+    "alt": "A camera monitor frames two seated performers at the table",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-15.webp",
+    "thumbnail": "assets/shoot-diary/thumb-15.webp",
+    "chapter": "Between takes",
+    "title": "In costume",
+    "alt": "A performer wearing a patterned headscarf beside the crew",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-16.webp",
+    "thumbnail": "assets/shoot-diary/thumb-16.webp",
+    "chapter": "Between takes",
+    "title": "The people in the frame",
+    "alt": "Four people posing together outside the location",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-17.webp",
+    "thumbnail": "assets/shoot-diary/thumb-17.webp",
+    "chapter": "Between takes",
+    "title": "A crew snapshot",
+    "alt": "A mirror snapshot of crew members and a performer",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-18.webp",
+    "thumbnail": "assets/shoot-diary/thumb-18.webp",
+    "chapter": "Between takes",
+    "title": "Off-camera company",
+    "alt": "Another mirror snapshot with the crew",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-19.webp",
+    "thumbnail": "assets/shoot-diary/thumb-19.webp",
+    "chapter": "Between takes",
+    "title": "A moment together",
+    "alt": "Crew members sharing a mirror photograph",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-20.webp",
+    "thumbnail": "assets/shoot-diary/thumb-20.webp",
+    "chapter": "Between takes",
+    "title": "One more for the diary",
+    "alt": "An informal mirror snapshot between takes",
+    "width": 1500,
+    "height": 2000
+  },
+  {
+    "src": "assets/shoot-diary/photo-21.webp",
+    "thumbnail": "assets/shoot-diary/thumb-21.webp",
+    "chapter": "Between takes",
+    "title": "A playful perspective",
+    "alt": "Flowers in the foreground with a camera operator behind",
+    "width": 1500,
+    "height": 2000
+  }
+]

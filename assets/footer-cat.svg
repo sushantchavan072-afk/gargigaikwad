@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <style>
+    .cat-eyes{transform-box:fill-box;transform-origin:center;animation:cat-blink 5.2s ease-in-out infinite}
+    .wave-paw{transform-box:view-box;transform-origin:89px 96px;animation:cat-wave 2.7s cubic-bezier(.42,0,.58,1) infinite}
+    @keyframes cat-blink{0%,85%,92%,100%{transform:scaleY(1)}87%,90%{transform:scaleY(.08)}}
+    @keyframes cat-wave{0%,63%,100%{transform:rotate(0deg)}69%{transform:rotate(-22deg)}75%{transform:rotate(9deg)}81%{transform:rotate(-18deg)}87%{transform:rotate(0deg)}}
+    @media(prefers-reduced-motion:reduce){.cat-eyes,.wave-paw{animation:none}}
+  </style>
+  <path d="M9 98H119" stroke="#fff0d4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M18 96c-4-15-5-38-3-58l3-20c1-6 5-7 10-3l21 20c10-4 22-4 32 0l21-20c5-4 9-3 10 3l3 20c3 21 2 43-3 58H18Z" fill="#f3b65b"/>
+  <path d="m24 23-1-2 2 23c3-7 8-12 15-16L24 23Zm80 0 1-2-2 23c-3-7-8-12-15-16l16-5Z" fill="#ee91a1"/>
+  <path d="M18 54c-5-2-9-1-12 1m13 6c-6-1-10 1-13 4m105-11c5-2 9-1 12 1m-13 6c6-1 10 1 13 4" stroke="#a86b39" stroke-width="2" stroke-linecap="round"/>
+  <g class="cat-eyes">
+    <ellipse cx="44" cy="64" rx="15" ry="16" fill="#fffaf1"/>
+    <ellipse cx="84" cy="64" rx="15" ry="16" fill="#fffaf1"/>
+    <ellipse cx="45" cy="65" rx="8" ry="9" fill="#28202a"/>
+    <ellipse cx="83" cy="65" rx="8" ry="9" fill="#28202a"/>
+    <circle cx="42" cy="61" r="3" fill="#fff"/>
+    <circle cx="80" cy="61" r="3" fill="#fff"/>
+  </g>
+  <ellipse cx="35" cy="82" rx="7" ry="4" fill="#ef8f9f" opacity=".75"/>
+  <ellipse cx="93" cy="82" rx="7" ry="4" fill="#ef8f9f" opacity=".75"/>
+  <path d="m61 79 7 0-3.5 5L61 79Z" fill="#dc7689"/>
+  <path d="M64.5 84v4m0 0c-3 3-5 3-8 1m8-1c3 3 5 3 8 1" stroke="#7e5141" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M12 98c-2-9 2-18 9-20 9-2 16 4 17 13l1 7H12Z" fill="#f3b65b"/>
+  <path d="M19 95v5m7-6v6m7-6v5" stroke="#a86b39" stroke-width="1.5" stroke-linecap="round"/>
+  <g class="wave-paw">
+    <path d="M83 98c-2-9 2-18 9-20 9-2 16 4 17 13l1 7H83Z" fill="#f3b65b"/>
+    <path d="M90 95v5m7-6v6m7-6v5" stroke="#a86b39" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>
