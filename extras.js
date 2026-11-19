@@ -283,6 +283,5 @@
     }
     window.addEventListener("scroll", function () { if (!pend) { pend = true; requestAnimationFrame(spy); } }, { passive: true });
     window.addEventListener("resize", spy); spy();
-    d.addEventListener("case-toggle", spy);
   })();
 })();

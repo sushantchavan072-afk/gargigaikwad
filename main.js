@@ -235,7 +235,7 @@
   if (big) { fit(); window.addEventListener("resize", fit); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit); }
 
   /* ---------- reveal on scroll ---------- */
-  $$(".card-head, .projects-heading, .case-introduction, .case-sheet-inner > section > h2, .case-sheet-inner > section > p, .case-chapters > section, .craft-heading, .craft-photo, .diary-related, .diary-preview").forEach(function (el) {
+  $$(".card-head, .case-introduction, .case-sheet-inner > section > h2, .case-sheet-inner > section > p, .case-chapters > section, .craft-heading, .craft-photo, .diary-related, .diary-preview").forEach(function (el) {
     if (!el.closest("[data-reveal]")) el.setAttribute("data-reveal", "");
   });
   var rv = $$("[data-reveal]");

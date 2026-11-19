@@ -325,7 +325,6 @@ em .gg-l.is-flip{font-style:normal}
 .fb-zoom{font-size:13px}
 .fb-zoom img[hidden]{display:none}
 .publication-case .case-sheet-inner{gap:clamp(48px,7vw,80px);grid-template-columns:minmax(0,1fr)}
-.publication-case .case-cover > img{object-fit:contain;background:#e9eef5}
 .publication-chapter{scroll-margin-top:110px;min-width:0}
 .publication-chapter h2,.publication-reader h2{font-size:clamp(32px,4vw,48px);line-height:1.1;margin:12px 0 18px}
 .publication-chapter > p,.publication-reader > p{max-width:66ch;line-height:1.7;color:var(--zinc-800);margin-bottom:24px}
@@ -516,15 +515,14 @@ em .gg-l.is-flip{font-style:normal}
 
 /* Open project pages and an explicit route into the full collection. */
 .case-hero .case-sheet-inner { padding-top:0; }
-.projects-heading { width:min(1100px,calc(100% - 48px)); margin:0 auto; padding:52px 0 64px; display:flex; justify-content:space-between; align-items:center; gap:24px; }
-.projects-heading h2 { font-size:clamp(38px,5vw,64px); line-height:1.1; margin:12px 0; }
-.projects-heading p:last-child { font-size:14px; color:var(--zinc-700); }
-.projects-heading .btn-dark { flex-shrink:0; gap:12px; }
 .work-home-link { display:inline-block; margin-bottom:28px; color:var(--zinc-700); font-size:13px; text-underline-offset:4px; }
 .work-home-link:hover { text-decoration:underline; }
 .case-sheet-inner [data-reveal] { scroll-margin-top:110px; }
 @media(max-width:600px) {
- .projects-heading { align-items:flex-start; flex-direction:column; padding:36px 0 42px; }
  .case-hero { margin-top:28px; }
  .case-hero .case-sheet-inner { padding-inline:16px; }
 }
+
+/* Keep the final collection link inside small screens. */
+@media(max-width:600px){.more .folder{gap:14px;transform:none}.more .f-word{font-size:24px;line-height:1.2}.more .f-icon{width:170px;transform:scale(.75);margin-inline:-18px}}
+@media(max-width:360px){.nav{gap:4px}.nav-logo,.nav-mail{width:44px;height:44px}.nav-lang{width:40px;height:44px}.nav-pill a{min-width:40px;padding-inline:9px}}
