@@ -158,64 +158,85 @@
     });
   }
 
-  /* ---------- scroll progress bar, nav hide/show, card media drift ---------- */
+  /* Preserve the card stack and its drift; only visible strips need frame updates. */
   var bar = $(".progress"), nav = $("#nav"), lastY = window.scrollY || 0;
-  var stack = $(".stack"), cards = $$(".card");
-  var ticking = false;
+  var stack = $(".stack"), cards = $$(".card"), ticking = false;
   var lockScroll = function (on) { document.documentElement.style.overflow = on ? "hidden" : ""; };
-
-  /* Card media strips glide on their own (slow, eased ping-pong); scrolling nudges them a little further.
-     They never pause, hover included. Only on-screen cards are touched, and measurements are cached
-     so the per-frame work is just one style write per visible card. */
-  var SPEED = 24; /* px per second */
-  var live = [];
-  cards.forEach(function (card, i) {
-    var strip = $(".strip", card), track = $(".track", card);
-    if (strip && track) live.push({ card: card, strip: strip, track: track, i: i, on: false, overflow: 0, nat: 0, h: 0, sticky: false });
-  });
-  function measure() {
+  var live = cards.map(function (card, i) {
+    return { card:card, strip:$(".strip",card), track:$(".track",card), i:i, top:0, height:0, overflow:0, sticky:false, active:false };
+  }).filter(function (c) { return c.strip && c.track; });
+  var scrollMax = 1, navDirection = 0, navTravel = 0, measuredWidth = innerWidth;
+  var driftFrame = 0, driftStart = performance.now(), activeStrips = [];
+  function measureStrips() {
+    var top = stack ? stack.offsetTop : 0;
     live.forEach(function (c) {
-      c.overflow = Math.max(0, c.track.scrollWidth - c.strip.clientWidth);
-      c.sticky = getComputedStyle(c.card).position === "sticky"; c.h = c.card.offsetHeight;
-      c.nat = c.sticky && stack ? stack.offsetTop + c.i * c.h : c.card.offsetTop;
+      var style = getComputedStyle(c.card);
+      top += parseFloat(style.marginTop) || 0;
+      c.top = top; c.height = c.card.offsetHeight; top += c.height;
+      c.sticky = style.position === "sticky";
+      c.overflow = Math.max(0,c.track.scrollWidth-c.strip.clientWidth);
     });
+    measuredWidth = innerWidth;
+    scrollMax = Math.max(1,document.documentElement.scrollHeight-innerHeight);
+    scheduleScroll();
   }
-  if (live.length && "IntersectionObserver" in window) {
-    var cardIO = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { for (var k = 0; k < live.length; k++) if (live[k].card === e.target) live[k].on = e.isIntersecting; });
-    }, { rootMargin: "120px 0px" });
-    live.forEach(function (c) { cardIO.observe(c.card); });
-  } else live.forEach(function (c) { c.on = true; });
-  var t0 = performance.now(), lastMeasure = -9999;
   function drift(now) {
-    now = now || performance.now();
-    if (now - lastMeasure > 900) { measure(); lastMeasure = now; }      /* cheap re-measure: images/fonts/resize all settle here */
-    var vh = window.innerHeight, sy = window.scrollY, t = (now - t0) / 1000;
-    for (var k = 0; k < live.length; k++) {
-      var c = live[k]; if (!c.on || !c.overflow) continue;
-      var p = clamp((sy - (c.nat - vh)) / (vh + c.h), 0, 1);
-      var phase = reduce ? p : (t * SPEED / c.overflow) / 2 + c.i * 0.37 + p * 0.35;   /* one back-and-forth = overflow*2 / SPEED seconds */
-      var tri = Math.abs(((phase % 1) + 1) % 1 * 2 - 1);                                /* 0..1..0 */
-      c.track.style.setProperty("--x", (-c.overflow * (0.5 - 0.5 * Math.cos(Math.PI * tri))).toFixed(1));
-    }
+    driftFrame = 0;
+    var t = (now-driftStart)/1000, y = lastY, vh = innerHeight;
+    activeStrips.forEach(function (c) {
+      var p = clamp((y-(c.top-vh))/(vh+c.height),0,1);
+      var phase = reduce ? p : (t*24/c.overflow)/2+c.i*.37+p*.35;
+      var tri = Math.abs(((phase%1)+1)%1*2-1);
+      c.track.style.transform = "translate3d("+(-c.overflow*(.5-.5*Math.cos(Math.PI*tri))).toFixed(1)+"px,0,0)";
+    });
+    if (!reduce && activeStrips.length && !document.hidden) driftFrame = requestAnimationFrame(drift);
   }
-  if (live.length && !reduce) (function loop(now) { if (!document.hidden) drift(now); requestAnimationFrame(loop); })();
+  function updateStrips(y) {
+    activeStrips = live.filter(function (c,i) {
+      // A sticky card stays intersecting after the next card has completely covered it.
+      var next = live[i+1];
+      var end = c.sticky && next ? next.top : c.top+c.height;
+      var active = !document.hidden && c.overflow>0 && c.top<y+innerHeight && y<end;
+      if (active !== c.active) { c.track.style.willChange = active ? "transform" : "auto"; c.active = active; }
+      return active;
+    });
+    if (reduce) drift(performance.now());
+    else if (activeStrips.length && !driftFrame) drift(performance.now());
+    else if (!activeStrips.length && driftFrame) { cancelAnimationFrame(driftFrame); driftFrame=0; }
+  }
   function onScroll() {
-    var y = window.scrollY, max = document.documentElement.scrollHeight - window.innerHeight;
-    if (bar) bar.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
-    if (nav) {
-      if (y < 80) nav.classList.remove("hide");
-      else if (y - lastY > 6) nav.classList.add("hide");
-      else if (lastY - y > 6) nav.classList.remove("hide");
-    }
-    lastY = y;
-    if (reduce && live.length) { measure(); drift(); }
     ticking = false;
+    var rawY = window.scrollY, y = clamp(rawY,0,scrollMax), delta = y-lastY;
+    if (bar) bar.style.transform = "scaleX("+clamp(y/scrollMax,0,1)+")";
+    if (nav) {
+      if (rawY<0 || rawY>scrollMax) { navTravel=0; navDirection=0; }
+      else if (y<80 || nav.querySelector(":focus-visible")) { nav.classList.remove("hide"); navTravel=0; navDirection=0; }
+      else if (delta) {
+        var direction = delta>0 ? 1 : -1;
+        if (direction!==navDirection) { navTravel=0; navDirection=direction; }
+        navTravel += Math.abs(delta);
+        if (navTravel>=28) { nav.classList.toggle("hide",direction>0); navTravel=0; }
+      }
+    }
+    lastY=y; updateStrips(y);
   }
+  function scheduleScroll() { if (!ticking) { ticking=true; requestAnimationFrame(onScroll); } }
   if (!document.body.classList.contains("pg")) {
-    window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
-    window.addEventListener("resize", function () { lastMeasure = -9999; onScroll(); });
-    onScroll();
+    window.addEventListener("scroll",scheduleScroll,{passive:true});
+    window.addEventListener("resize",function () {
+      if (innerWidth!==measuredWidth) measureStrips();
+      else { scrollMax=Math.max(1,document.documentElement.scrollHeight-innerHeight); lastY=clamp(window.scrollY,0,scrollMax); navTravel=0; navDirection=0; scheduleScroll(); }
+    });
+    document.addEventListener("visibilitychange",scheduleScroll);
+    if ("ResizeObserver" in window) {
+      // Real content changes (including translations) invalidate cached geometry, not elapsed time.
+      var sizeObserver = new ResizeObserver(measureStrips);
+      if (stack) sizeObserver.observe(stack);
+      var page=$("main"); if (page) sizeObserver.observe(page);
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureStrips);
+    window.addEventListener("load",measureStrips,{once:true});
+    measureStrips();
   }
 
   /* ---------- hero: once the words have risen, stop clipping so italic overhangs ("feel") are never cut ---------- */
@@ -223,16 +244,18 @@
   if (h1) setTimeout(function () { h1.classList.add("done"); }, reduce ? 0 : 2300);
 
   /* ---------- fit the giant footer name to the container ---------- */
-  var big = $(".bigname");
+  var big = $(".bigname"), lastFitWidth = 0, footerViewportWidth = innerWidth;
   function fit() {
     if (!big) return;
     var par = big.parentElement, cs = getComputedStyle(par);
     var avail = par.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (Math.abs(avail-lastFitWidth)<1) return;
+    lastFitWidth=avail;
     big.style.fontSize = "100px";
     var w = big.getBoundingClientRect().width || 1;
     big.style.fontSize = Math.min(260, (100 * avail) / w) + "px";
   }
-  if (big) { fit(); window.addEventListener("resize", fit); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit); }
+  if (big) { fit(); window.addEventListener("resize", function(){if(innerWidth!==footerViewportWidth){footerViewportWidth=innerWidth;fit();}}); if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){lastFitWidth=0;fit();}); }
 
   /* ---------- reveal on scroll ---------- */
   $$(".card-head, .case-introduction, .case-sheet-inner > section > h2, .case-sheet-inner > section > p, .case-chapters > section, .craft-heading, .craft-photo, .diary-related, .diary-preview").forEach(function (el) {
@@ -291,7 +314,7 @@
     var els = $$(".tag", box).filter(function (t) { return t.offsetWidth > 0; });   /* skip tags hidden on small screens */
     if (reduce || !window.Matter) { document.body.classList.add("no-physics"); return; }
     var M = Matter, Engine = M.Engine, Bodies = M.Bodies, Body = M.Body, Composite = M.Composite, Constraint = M.Constraint;
-    var engine = Engine.create(); engine.gravity.y = 1.15;
+    var engine = Engine.create({enableSleeping:true}); engine.gravity.y = 1.15;
     var floorY = 0, W = 0, H = 0, walls = [], items = [], drag = null, started = false, raf = 0, last = 0, acc = 0, visible = true;
 
     function measure() { var r = box.getBoundingClientRect(); W = r.width; H = r.height; }
@@ -340,6 +363,7 @@
       var step = 1000 / 60, n = 0;
       while (acc >= step && n < 3) { Engine.update(engine, step); acc -= step; n++; }
       render();
+      if(!drag && items.length && items.every(function(it){return it.body.isSleeping;})) stop();
     }
     function run() { if (!raf && visible && !document.hidden) { last = 0; acc = 0; raf = requestAnimationFrame(frame); } }
     function stop() { cancelAnimationFrame(raf); raf = 0; }
@@ -352,7 +376,7 @@
     var go = function () { setTimeout(start, reduce ? 0 : 1100); };   /* let the headline finish rising first */
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(go); else go();
 
-    var rz = 0; window.addEventListener("resize", function () { if (!started || rz) return; rz = requestAnimationFrame(function () { rz = 0; measure(); buildWalls(); }); });
+    var rz = 0, tagWidth=innerWidth; window.addEventListener("resize", function () { if (innerWidth===tagWidth || !started || rz) return; tagWidth=innerWidth; rz = requestAnimationFrame(function () { rz = 0; measure(); buildWalls(); items.forEach(function(it){M.Sleeping.set(it.body,false);}); run(); }); });
     document.addEventListener("visibilitychange", function () { document.hidden ? stop() : run(); });
     if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; visible ? run() : stop(); }).observe(hero);
 
@@ -363,6 +387,7 @@
       var r = box.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
       var c = Constraint.create({ pointA: { x: px, y: py }, bodyB: it.body, pointB: { x: px - it.body.position.x, y: py - it.body.position.y }, stiffness: 0.16, damping: 0.14, length: 0 });
       Composite.add(engine.world, c); drag = { c: c, el: el, r: r };
+      M.Sleeping.set(it.body,false); run();
       el.classList.add("drag"); try { el.setPointerCapture(e.pointerId); } catch (x) {}
       e.preventDefault();
     });

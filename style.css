@@ -50,17 +50,19 @@ b,strong{font-weight:700}
 .muted{color:var(--zinc-400)}
 
 /* ---------- Scroll progress + navigation ---------- */
-.progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--yellow);z-index:300;pointer-events:none}
-.nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;display:flex;gap:8px;align-items:center;transition:transform .5s var(--ease)}
-.nav.hide{transform:translate(-50%,-140%)}
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;transform:scaleX(0);transform-origin:left;background:var(--yellow);z-index:300;pointer-events:none}
+.nav{position:fixed;top:16px;left:0;right:0;z-index:200;display:flex;justify-content:center;gap:8px;align-items:center;pointer-events:none;transition:transform .28s var(--ease)}
+.nav>*{pointer-events:auto;flex-shrink:0}
+.nav.hide{transform:translateY(calc(-100% - 32px))}
 .nav .glass{background:rgba(244,244,245,.62);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(255,255,255,.7);box-shadow:0 1px 2px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.03)}
 .nav-logo{padding:0;border:0;appearance:none;background:transparent}
 .nav-logo:focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
 :root[data-theme="dark"] .nav .glass{background:rgba(39,39,42,.78);border-color:rgba(255,255,255,.12);box-shadow:0 1px 2px rgba(0,0,0,.2),0 0 0 1px rgba(255,255,255,.04)}
 .nav-logo,.nav-mail{width:56px;height:56px;border-radius:28px;display:grid;place-items:center;transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
 .nav-logo .smiley{display:block;width:34px;height:34px}
-.nav-logo .s-eye{transform-box:fill-box;transform-origin:center;animation:blink 5s infinite}
-@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.nav-logo .s-eye{transform-box:fill-box;transform-origin:center}
+.nav-logo.is-blinking .s-eye{animation:blink .18s ease-in-out}
+@keyframes blink{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.1)}}
 @media (prefers-reduced-motion:reduce){.nav-logo .s-eye{animation:none}}
 .nav-mail{background:var(--yellow);font-size:22px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .nav-logo:hover,.nav-mail:hover{transform:scale(1.07) rotate(-4deg)}
@@ -119,7 +121,7 @@ b,strong{font-weight:700}
 
 /* scroll-linked media strip: main.js drifts .track sideways as you scroll */
 .strip{margin-top:40px;flex:1;min-height:0;overflow:hidden;position:relative}
-.track{display:flex;gap:8px;width:max-content;height:612px;will-change:transform;transform:translate3d(calc(var(--x,0)*1px),0,0)}
+.track{display:flex;gap:8px;width:max-content;height:612px}
 .frame{position:relative;border:2px solid var(--zinc-100);border-radius:24px;overflow:hidden;background:var(--zinc-50);flex:none}
 .frame img,.frame video{width:100%;height:100%;object-fit:cover}
 .track .frame{height:612px;width:520px}

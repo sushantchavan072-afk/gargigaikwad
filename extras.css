@@ -11,7 +11,7 @@
 :root[lang="mr"] .nav-pill a{font-size:17px}
 
 /* ---------- A2: paper-wipe page transition (html::before = yellow sheet, html::after = page-colour sheet) ---------- */
-html::before,html::after{content:"";position:fixed;inset:0;pointer-events:none;transform:translateY(100%);will-change:transform}
+html::before,html::after{content:"";position:fixed;inset:0;pointer-events:none;transform:translateY(100%)}
 html::before{background:var(--yellow);z-index:9998}
 html::after{background:var(--bg);z-index:9999}
 html.wipe-go::before{transform:translateY(0);transition:transform .48s var(--ease)}
@@ -526,3 +526,8 @@ em .gg-l.is-flip{font-style:normal}
 /* Keep the final collection link inside small screens. */
 @media(max-width:600px){.more .folder{gap:14px;transform:none}.more .f-word{font-size:24px;line-height:1.2}.more .f-icon{width:170px;transform:scale(.75);margin-inline:-18px}}
 @media(max-width:360px){.nav{gap:4px}.nav-logo,.nav-mail{width:44px;height:44px}.nav-lang{width:40px;height:44px}.nav-pill a{min-width:40px;padding-inline:9px}}
+
+/* Promote transition layers only while they are visible. */
+html:is(.wipe-go,.wipe-in)::before,html:is(.wipe-go,.wipe-in)::after { will-change:transform; }
+/* Match the existing icon-only mobile navigation in both languages. */
+@media(max-width:809.98px){:root[lang="mr"] .nav-pill a{font-size:0}}

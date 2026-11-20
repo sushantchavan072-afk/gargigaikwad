@@ -114,6 +114,25 @@
   /* ================= A3: smiley eyes follow the pointer + type "gargi" for a letter rain ================= */
   (function smiley() {
     var logo = $(".nav-logo");
+    if (logo && !reduce) {
+      var blinkTimer = 0, blinkEnd = 0;
+      function scheduleBlink() {
+        clearTimeout(blinkTimer);
+        if (d.hidden) return;
+        blinkTimer = setTimeout(function () {
+          var navbar = logo.closest(".nav");
+          if (!d.hidden && navbar && !navbar.classList.contains("hide")) {
+            logo.classList.add("is-blinking");
+            blinkEnd = setTimeout(function () { logo.classList.remove("is-blinking"); }, 200);
+          }
+          scheduleBlink();
+        }, 5200);
+      }
+      d.addEventListener("visibilitychange", function () {
+        clearTimeout(blinkEnd); logo.classList.remove("is-blinking"); scheduleBlink();
+      });
+      scheduleBlink();
+    }
     if (logo && fine && !reduce) {
       var px = 0, py = 0, pending = false;
       var upd = function () {
@@ -160,9 +179,8 @@
     var nodes = $$("[data-i18n]");
     if (!dict || !nodes.length) return;
     nodes.forEach(function (n) { n.setAttribute("data-i18n-en", n.innerHTML); });
-    var btn = d.createElement("button");
-    btn.type = "button"; btn.className = "nav-lang glass";
-    var mail = $(".nav-mail"); if (mail && mail.parentNode) mail.parentNode.insertBefore(btn, mail); else return;
+    var btn = $(".nav-lang");
+    if (!btn) return;
     function apply(l, silent) {
       curLang = l; root.lang = l === "mr" ? "mr" : "en";
       nodes.forEach(function (n) {
@@ -214,6 +232,7 @@
     var mx = -999, my = -999, pend = false;
     function frame() {
       pend = false;
+      var updates = [];
       heads.forEach(function (h) {
         var hr = h.getBoundingClientRect();
         var near = my > hr.top - 160 && my < hr.bottom + 160;
@@ -221,9 +240,10 @@
           var p = 0;
           if (near) { var r = s.getBoundingClientRect(), dist = Math.hypot(mx - (r.left + r.width / 2), my - (r.top + r.height / 2)); p = Math.pow(clamp(1 - dist / 130, 0, 1), 1.3); }
           var prev = +(s.getAttribute("data-p") || 0);
-          if (Math.abs(p - prev) > 0.03 || (p === 0 && prev !== 0)) { s.setAttribute("data-p", p.toFixed(2)); s.style.setProperty("--p", p.toFixed(2)); s.classList.toggle("is-flip", p > 0.45); }
+          if (Math.abs(p - prev) > 0.03 || (p === 0 && prev !== 0)) updates.push({el:s,p:p});
         });
       });
+      updates.forEach(function (u) { u.el.setAttribute("data-p",u.p.toFixed(2)); u.el.style.setProperty("--p",u.p.toFixed(2)); u.el.classList.toggle("is-flip",u.p>0.45); });
     }
     d.addEventListener("pointermove", function (e) { mx = e.clientX; my = e.clientY; if (!pend) { pend = true; requestAnimationFrame(frame); } }, { passive: true });
     root.addEventListener("mouseleave", function () { mx = my = -999; if (!pend) { pend = true; requestAnimationFrame(frame); } });
